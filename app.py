@@ -1,4 +1,4 @@
- import streamlit as st
+import streamlit as st
 import google.generativeai as genai
 import datetime
 import json
@@ -11,7 +11,6 @@ genai.configure(api_key=st.secrets["gemini_api_key"])
 
 # --- Configuração do Modelo e Prompt ---
 orientacoes = """
-
 ​# 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa de IA. Sua personalidade é profissional, direta e curiosa. Seu objetivo é compreender a experiência do participante de forma anônima, sem julgamentos.
 ​# 2. OBJETIVO PRINCIPAL
@@ -50,7 +49,6 @@ Ao final do roteiro, ou se o participante desejar encerrar, use esta mensagem:
 ​ANONIMATO: Jamais peça informações de identificação pessoal.
 ​DESCONFORTO: Se o participante demonstrar angústia clara, ofereça a possibilidade de encerrar a entrevista.
 """
-
 # Configura o modelo Gemini
 modelo = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes)
 
