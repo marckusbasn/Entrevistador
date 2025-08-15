@@ -1,0 +1,42 @@
+[
+    {
+        "role": "model",
+        "content": "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
+    },
+    {
+        "role": "user",
+        "content": "SIm"
+    },
+    {
+        "role": "model",
+        "content": "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar e o que você sentiria?"
+    },
+    {
+        "role": "user",
+        "content": "Me sentiria calma"
+    },
+    {
+        "role": "model",
+        "content": "Entendo que se sentiria calma.  Poderia me dizer o porquê de você se sentir calma nessa situação de pressão e prazo apertado?  O que te ajudaria a manter a calma?\n"
+    },
+    {
+        "role": "user",
+        "content": "Confiança no meu trabalho"
+    },
+    {
+        "role": "model",
+        "content": "Sua confiança no seu trabalho é um ponto importante.  Como essa confiança se manifesta no seu dia a dia?  O que te dá essa segurança para lidar com prazos apertados e a responsabilidade de um relatório importante?\n"
+    },
+    {
+        "role": "user",
+        "content": "Minha capacitação tecnica"
+    },
+    {
+        "role": "model",
+        "content": "Entendo que sua capacitação técnica contribui para sua confiança.  Poderia me dar um exemplo de como sua capacitação técnica te ajuda a lidar com a pressão de um prazo apertado e a responsabilidade de um relatório importante?  Você se sente preparada para lidar com eventuais imprevistos ou dificuldades técnicas?\n"
+    },
+    {
+        "role": "model",
+        "content": "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
+    }
+]
