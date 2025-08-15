@@ -104,33 +104,48 @@ def save_transcript_to_github(chat_history):
 # --- Lógica do Streamlit ---
 st.title("Chat Entrevistador de Pesquisa - UFF")
 
-if "chat" not in st.session_state:
+# Inicializa o chat na sessão do Streamlit, e o estado da conversa
+if "chat_estado" not in st.session_state:
+    st.session_state.chat_estado = "inicio"
     
-    # Seleciona uma vinheta aleatória e a anexa ao prompt
-    vinheta_escolhida = random.choice(vinhetas)
-    prompt_completo = orientacoes + "\n" + vinheta_escolhida
+if st.session_state.chat_estado == "inicio":
+    st.write(mensagem_abertura)
     
-    # Inicia o modelo com o novo prompt
-    modelo = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo)
-    st.session_state.chat = modelo.start_chat()
+if "messages" not in st.session_state:
     st.session_state.messages = []
     
-    # Envia a mensagem de abertura e a vinheta para o participante
-    st.session_state.messages.append({"role": "model", "content": mensagem_abertura + "\n\n" + vinheta_escolhida})
-
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
 if prompt := st.chat_input("Sua resposta...", key="chat_input"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
-    with st.chat_message("assistant"):
-        with st.spinner("Pensando..."):
-            response = st.session_state.chat.send_message(prompt)
-            st.session_state.messages.append({"role": "model", "content": response.text})
-            st.write(response.text)
+    
+    if st.session_state.chat_estado == "inicio":
+        st.session_state.chat_estado = "entrevista"
+        
+        # Seleciona uma vinheta aleatória e a anexa ao prompt
+        vinheta_escolhida = random.choice(vinhetas)
+        prompt_completo = orientacoes + "\n" + vinheta_escolhida
+        
+        # Inicia o modelo com o novo prompt
+        modelo = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo)
+        st.session_state.chat = modelo.start_chat()
+        
+        # Adiciona a primeira resposta do usuário e a vinheta ao histórico
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
+
+        st.experimental_rerun()
+    
+    else: # O estado é 'entrevista'
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.write(prompt)
+        with st.chat_message("assistant"):
+            with st.spinner("Pensando..."):
+                response = st.session_state.chat.send_message(prompt)
+                st.session_state.messages.append({"role": "model", "content": response.text})
+                st.write(response.text)
 
 if st.button("Encerrar Entrevista e Salvar"):
     with st.spinner("Salvando entrevista no GitHub..."):
@@ -138,4 +153,4 @@ if st.button("Encerrar Entrevista e Salvar"):
         st.write(status_message)
     st.session_state.clear()
     time.sleep(2)
-    st.rerun()
+    st.experimental_rerun()
