@@ -47,7 +47,7 @@ REGRA 7: CONECTANDO AS PERGUNTAS (PONTE CONVERSACIONAL): Sempre comece sua respo
 REGRA 8: INFERÊNCIA CONTEXTUAL: Ao processar a resposta do participante, vá além do significado literal das palavras. Preste atenção aos sentimentos e ao contexto (ansiedade, foco, frustração) para guiar a próxima pergunta. Por exemplo, se o participante menciona "não conseguir almoçar", entenda isso como um sintoma de estresse ou foco intenso, e não como uma simples questão de logística. Sempre explore o 'porquê' por trás dos sentimentos e ações.
 REGRA 9: EVITAR PERGUNTAS DUPLAS: Se a sua pergunta tiver mais de uma parte (ex: "Como você reagiria e o que pensaria?"), reformule-a para focar em uma única questão por vez. Apresente as partes restantes da pergunta em momentos diferentes, seguindo o fluxo da conversa.
 REGRA 10: LIDANDO COM RESPOSTAS DESCONEXAS: Respostas curtas ou negativas a uma pergunta do cenário, como "Não faria nada" ou "Isso não me afeta", NÃO SÃO motivos para encerrar. Pelo contrário, são excelentes oportunidades para aprofundar, perguntando "Entendo. Poderia me dizer por que você sente que não faria nada nessa situação?". Se a resposta for ambígua ou irrelevante, redirecione a conversa gentilmente. Por exemplo: "Entendi. Para continuarmos, poderia me dar um exemplo sobre..."
-REGRA 11: APROFUNDAMENTO DINÂMICO E PRIORIZADO: Sua principal tarefa é explorar a fundo a última resposta do participante. Não passe para a próxima pergunta da vinheta ou para um novo tópico sem antes esgotar o que o participante disse. Baseie suas perguntas no conteúdo, buscando exemplos, sentimentos e razões por trás das respostas. Use frases como "Poderia me dar um exemplo de...?", "O que você sentiu exatamente quando...?", "Por que você acha que isso acontece?".
+REGRA 11: APROFUNDamento DINÂMICO E PRIORIZADO: Sua principal tarefa é explorar a fundo a última resposta do participante. Não passe para a próxima pergunta da vinheta ou para um novo tópico sem antes esgotar o que o participante disse. Baseie suas perguntas no conteúdo, buscando exemplos, sentimentos e razões por trás das respostas. Use frases como "Poderia me dar um exemplo de...?", "O que você sentiu exatamente quando...?", "Por que você acha que isso acontece?".
 REGRA 12: SIMPLIFICAR AS PERGUNTAS: Sempre que possível, formule perguntas curtas, diretas e focadas em um único conceito por vez. Evite frases longas ou complexas que possam confundir o participante.
 """
 vinhetas = [
@@ -84,12 +84,13 @@ def save_transcript_to_github(chat_history):
     except Exception as e:
         return f"Erro ao salvar no GitHub: {e}"
 
-st.title("felt accountability no setor público - Entrevista")
+# <<< TÍTULO AJUSTADO AQUI >>>
+st.title("Felt Accountability no Setor Público - Entrevista")
 
 if "model" not in st.session_state:
     st.session_state.model = None
     st.session_state.messages = []
-    st.session_state.interview_over = False # <<< NOVO: Flag para controlar o estado da entrevista
+    st.session_state.interview_over = False 
     st.session_state.messages.append({"role": "model", "content": mensagem_abertura})
 
 for message in st.session_state.messages:
@@ -97,32 +98,24 @@ for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-# Desativa o input se a entrevista tiver terminado
 if prompt := st.chat_input("Sua resposta...", key="chat_input", disabled=st.session_state.interview_over):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        # Se o modelo não foi inicializado, este é o primeiro input do utilizador.
         if st.session_state.model is None:
-            # <<< NOVA LÓGICA DE VERIFICAÇÃO DE CONSENTIMENTO >>>
             negative_responses = ["não", "nao", "não quero", "nao quero", "não, obrigado", "nao, obrigado"]
-            # Verifica se a primeira resposta é uma recusa
             if prompt.lower().strip() in negative_responses:
-                # Se for, encerra a entrevista e bloqueia o input
                 st.write(mensagem_encerramento)
                 st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
                 st.session_state.interview_over = True
-                st.rerun() # Reroda para desativar o campo de input
+                st.rerun() 
             else:
-                # Se não for uma recusa, assume consentimento e inicia a entrevista
                 st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
                 vinheta_escolhida = random.choice(vinhetas)
                 st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
                 st.rerun()
-        
-        # Se o modelo já existe, a conversa continua normalmente
         else:
             placeholder = st.empty()
             placeholder.markdown("Digitando…")
@@ -156,5 +149,5 @@ if st.button("Encerrar Entrevista"):
         save_transcript_to_github(st.session_state.messages)
         st.write(mensagem_encerramento)
         st.session_state.interview_over = True
-    time.sleep(1) # Pequena pausa para o utilizador ler
+    time.sleep(1) 
     st.rerun()
