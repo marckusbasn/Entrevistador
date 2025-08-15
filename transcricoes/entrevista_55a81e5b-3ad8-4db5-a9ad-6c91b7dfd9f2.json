@@ -1,0 +1,90 @@
+[
+    {
+        "role": "model",
+        "content": "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
+    },
+    {
+        "role": "user",
+        "content": "Sim"
+    },
+    {
+        "role": "model",
+        "content": "Imagine um trabalho importante feito em equipe. O resultado final será muito visível para todos na organização. Se for um sucesso, o mérito é do grupo. Se houver uma falha, pode ser difícil apontar um único responsável. Como essa dinâmica de responsabilidade compartilhada afeta sua maneira de atuar?"
+    },
+    {
+        "role": "user",
+        "content": "Muito. Pois eu ficaria meio reprimido."
+    },
+    {
+        "role": "model",
+        "content": "Entendo que isso causa uma certa repressão.  Poderia me dar um exemplo de como essa dinâmica de responsabilidade compartilhada te deixa reprimido em seu trabalho?\n"
+    },
+    {
+        "role": "user",
+        "content": "Os chefes ficariam em cima de mim."
+    },
+    {
+        "role": "model",
+        "content": "Entendo.  Sua resposta sobre a pressão dos chefes é muito importante. Seguindo essa linha, quando você pensa em “consequência negativa” nesse contexto, o que vem à sua mente? É algo formal, como uma punição, ou mais ligado à sua reputação profissional?\n"
+    },
+    {
+        "role": "user",
+        "content": "A reputação eu acho pior."
+    },
+    {
+        "role": "model",
+        "content": "Entendo que a questão da reputação pesa mais para você.  Poderia me dar um exemplo de como a preocupação com sua reputação afeta a sua forma de trabalhar em equipe nesse tipo de projeto?\n"
+    },
+    {
+        "role": "user",
+        "content": "Se eu atuar mal, vão achar que eu sou incompetente."
+    },
+    {
+        "role": "model",
+        "content": "Entendo.  Isso é um ponto interessante. Agora, sobre a instância que avalia seu trabalho nessa situação (seus chefes, por exemplo), você sente que ela tem a autoridade necessária para fazer esse tipo de cobrança? Por quê?\n"
+    },
+    {
+        "role": "user",
+        "content": "Claro. Ele foi nomeado."
+    },
+    {
+        "role": "model",
+        "content": "Obrigado por esclarecer.  Entendo que a nomeação confere legitimidade à autoridade do seu chefe.  Mas, considerando a avaliação do seu trabalho em equipe, na sua opinião, essa pessoa tem o conhecimento técnico necessário para avaliar sua contribuição individual de forma justa, considerando a responsabilidade compartilhada?\n"
+    },
+    {
+        "role": "user",
+        "content": "Sim. Acredito que seja uma pessoa muito capacitada."
+    },
+    {
+        "role": "model",
+        "content": "Entendo.  Você mencionou a preocupação com a reputação e a percepção de competência do seu avaliador. Considerando isso, a possibilidade de um reconhecimento positivo por sua contribuição individual, mesmo em um trabalho em equipe, muda a forma como você encara essa pressão e a responsabilidade compartilhada?\n"
+    },
+    {
+        "role": "user",
+        "content": "Sim. Eu ficaria mais incentivado."
+    },
+    {
+        "role": "model",
+        "content": "Entendo que a possibilidade de reconhecimento positivo aumenta seu incentivo.  Como você se prepara, ou como você se sentiria ao se preparar, para o momento de justificar sua contribuição individual em um projeto com resultado negativo, considerando essa dinâmica de responsabilidade compartilhada?\n\n\n"
+    },
+    {
+        "role": "user",
+        "content": "Não entendi."
+    },
+    {
+        "role": "model",
+        "content": "Desculpe, minha pergunta foi um pouco complexa.  Imagine que o projeto em equipe não teve um bom resultado. Você precisa explicar sua parte no trabalho. Como você se prepara para esse momento de justificar suas ações e sua contribuição para o projeto?\n"
+    },
+    {
+        "role": "user",
+        "content": "Não faria nada."
+    },
+    {
+        "role": "model",
+        "content": "Mensagem de encerramento. Agradeço sua participação.\n"
+    },
+    {
+        "role": "model",
+        "content": "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
+    }
+]
