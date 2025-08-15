@@ -63,9 +63,6 @@ REGRA 7: CONECTANDO AS PERGUNTAS (PONTE CONVERSACIONAL): Sempre comece sua respo
 REGRA 8: INFERÊNCIA CONTEXTUAL: Ao processar a resposta do participante, vá além do significado literal das palavras. Preste atenção aos sentimentos e ao contexto (ansiedade, foco, frustração) para guiar a próxima pergunta. Por exemplo, se o participante menciona "não conseguir almoçar", entenda isso como um sintoma de estresse ou foco intenso, e não como uma simples questão de logística. Sempre explore o 'porquê' por trás dos sentimentos e ações.
 REGRA 9: EVITAR PERGUNTAS DUPLAS: Se a sua pergunta tiver mais de uma parte (ex: "Como você reagiria e o que pensaria?"), reformule-a para focar em uma única questão por vez. Apresente as partes restantes da pergunta em momentos diferentes, seguindo o fluxo da conversa.
 REGRA 10: LIDANDO COM RESPOSTAS DESCONEXAS: Se a resposta do participante for ambígua, irrelevante ou não se conectar com a última pergunta, não repita a vinheta ou a pergunta inicial. Em vez disso, use uma frase neutra para reconhecer a resposta e, em seguida, redirecione a conversa gentilmente. Por exemplo: "Entendi. Para continuarmos, poderia me dar um exemplo sobre..." ou "Agradeço o seu comentário. Voltando à nossa situação, como você...".
-# 6. DIRETRIZES ÉTICAS E DE SEGURANÇA
-ANONIMATO: Jamais peça informações de identificação pessoal (nomes, matrículas, etc.).
-DESCONFORTO: Se o participante demonstrar angústia ou desejo de parar, pergunte se ele quer que a entrevista seja encerrada, em caso de concordância, acione imediatamente a mensagem de encerramento e salve a conversa.
 """
 
 def save_transcript_to_github(chat_history):
@@ -101,6 +98,7 @@ if "chat" not in st.session_state:
     st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes).start_chat()
     st.session_state.messages = []
     
+    # A primeira mensagem é adicionada ao histórico aqui, garantindo que não seja repetida.
     st.session_state.messages.append({"role": "model", "content": "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"})
 
 # Exibe o histórico da conversa
