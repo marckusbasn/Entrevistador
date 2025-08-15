@@ -56,25 +56,19 @@ REGRA 6: APROFUNDANDO EM "ATRIBUBILIDADE" E "OBSERVABILIDADE": Se a resposta toc
 # 6. DIRETRIZES ÉTICAS E DE SEGURANÇA
 ANONIMATO: Jamais peça informações de identificação pessoal (nomes, matrículas, etc.).
 DESCONFORTO: Se o participante demonstrar angústia ou desejo de parar, pergunte se ele quer que a entrevista seja encerrada, em caso de concordância, acione imediatamente a mensagem de encerramento e salve a conversa.
+# 7. REGRA FINAL DE RESPOSTA
+Responda apenas com a pergunta ou comentário final para o participante. Não inclua seu raciocínio, nem o histórico da conversa. Mantenha o foco na próxima etapa da entrevista, de forma natural e fluida.
 """
 
-# Mensagem de abertura fixa (novo prompt)
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividade. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 
-# Vinhetas para o sistema de rotação
 vinhetas = [
-    # Opção A
     "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar e o que você sentiria?",
-    # Opção B
     "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria e o que pensaria sobre essa avaliação?",
-    # Opção C
     "Imagine um trabalho importante feito em equipe. O resultado final será muito visível para todos na organização. Se for um sucesso, o mérito é do grupo. Se houver uma falha, pode ser difícil apontar um único responsável. Como essa dinâmica de responsabilidade compartilhada afeta sua maneira de atuar?"
 ]
 
-# --- Funções ---
 def save_transcript_to_github(chat_history):
-    """Salva o histórico do chat em um arquivo JSON e faz o commit no GitHub."""
-    
     repo_name = "Entrevistador" 
     branch_name = "main"
 
@@ -100,22 +94,19 @@ def save_transcript_to_github(chat_history):
     except Exception as e:
         return f"Erro ao salvar no GitHub: {e}"
 
-# --- Lógica do Streamlit ---
-st.title("Felt accountability no setor público - Entrevista")
+st.title("Chat Entrevistador de Pesquisa - UFF")
 
-# Inicializa o chat na sessão do Streamlit, e o estado da conversa
 if "chat_estado" not in st.session_state:
     st.session_state.chat_estado = "inicio"
-    
-if st.session_state.chat_estado == "inicio":
-    st.write(mensagem_abertura)
-    
-if "messages" not in st.session_state:
     st.session_state.messages = []
     
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+    # Exibe a mensagem de abertura e espera a resposta
+    st.write(mensagem_abertura)
+    
+if "messages" in st.session_state:
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
 
 if prompt := st.chat_input("Sua resposta...", key="chat_input"):
     
@@ -124,7 +115,7 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
         
         vinheta_escolhida = random.choice(vinhetas)
         
-        prompt_completo = orientacoes + "\n" + vinheta_escolhida
+        prompt_completo = orientacoes + "\n" + "Vinheta escolhida para a entrevista: " + vinheta_escolhida
         
         modelo = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo)
         st.session_state.chat = modelo.start_chat()
@@ -132,9 +123,9 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
         
-        st.rerun() # <-- CORREÇÃO: Usando st.rerun()
+        st.rerun()
     
-    else: # O estado é 'entrevista'
+    else:
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
@@ -150,4 +141,4 @@ if st.button("Encerrar Entrevista e Salvar"):
         st.write(status_message)
     st.session_state.clear()
     time.sleep(2)
-    st.rerun() # <-- CORREÇÃO: Usando st.rerun()
+    st.rerun()
