@@ -45,6 +45,8 @@ REGRA 7: CONECTANDO AS PERGUNTAS (PONTE CONVERSACIONAL): Sempre comece sua respo
 REGRA 8: INFERÊNCIA CONTEXTUAL: Ao processar a resposta do participante, vá além do significado literal das palavras. Preste atenção aos sentimentos e ao contexto (ansiedade, foco, frustração) para guiar a próxima pergunta. Por exemplo, se o participante menciona "não conseguir almoçar", entenda isso como um sintoma de estresse ou foco intenso, e não como uma simples questão de logística. Sempre explore o 'porquê' por trás dos sentimentos e ações.
 REGRA 9: EVITAR PERGUNTAS DUPLAS: Se a sua pergunta tiver mais de uma parte (ex: "Como você reagiria e o que pensaria?"), reformule-a para focar em uma única questão por vez. Apresente as partes restantes da pergunta em momentos diferentes, seguindo o fluxo da conversa.
 REGRA 10: LIDANDO COM RESPOSTAS DESCONEXAS: Se a resposta do participante for ambígua, irrelevante ou não se conectar com a última pergunta, não repita a vinheta ou a pergunta inicial. Em vez disso, use uma frase neutra para reconhecer a resposta e, em seguida, redirecione a conversa gentilmente. Por exemplo: "Entendi. Para continuarmos, poderia me dar um exemplo sobre..." ou "Agradeço o seu comentário. Voltando à nossa situação, como você...".
+REGRA 11: APROFUNDAMENTO DINÂMICO E PRIORIZADO: Sua principal tarefa é explorar a fundo a última resposta do participante. Não passe para a próxima pergunta da vinheta ou para um novo tópico sem antes esgotar o que o participante disse. Baseie suas perguntas no conteúdo, buscando exemplos, sentimentos e razões por trás das respostas. Use frases como "Poderia me dar um exemplo de...?", "O que você sentiu exatamente quando...?", "Por que você acha que isso acontece?".
+REGRA 12: SIMPLIFICAR AS PERGUNTAS: Sempre que possível, formule perguntas curtas, diretas e focadas em um único conceito por vez. Evite frases longas ou complexas que possam confundir o participante.
 """
 
 # A mensagem de abertura e as vinhetas agora estão separadas
@@ -83,24 +85,8 @@ def save_transcript_to_github(chat_history):
     except Exception as e:
         return f"Erro ao salvar no GitHub: {e}"
 
-# Adiciona um callback para salvar quando a sessão termina
-def on_session_end():
-    if "messages" in st.session_state and st.session_state.messages:
-        try:
-            save_transcript_to_github(st.session_state.messages)
-        except Exception as e:
-            print(f"Erro ao salvar no encerramento da sessão: {e}")
-
+# --- Lógica do Streamlit ---
 st.title("Chat Entrevistador de Pesquisa - UFF")
-# st.on_session_end(on_session_end) # Esta função foi depreciada em versões mais recentes do Streamlit
-
-# Lógica para salvar automaticamente no final da sessão (método alternativo)
-if "session_ended_flag" not in st.session_state:
-    st.session_state.session_ended_flag = False
-
-if st.session_state.session_ended_flag:
-    on_session_end()
-    st.session_state.session_ended_flag = False
 
 # Inicializa o chat e o histórico de mensagens na sessão
 if "chat" not in st.session_state:
@@ -142,8 +128,9 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
                 st.write(response.text)
 
 if st.button("Encerrar Entrevista"):
-    st.session_state.session_ended_flag = True
-    on_session_end()
+    with st.spinner("Salvando entrevista no GitHub..."):
+        status_message = save_transcript_to_github(st.session_state.messages)
+        st.write(status_message)
     st.session_state.clear()
     time.sleep(2)
     st.rerun()
