@@ -1,3 +1,5 @@
 streamlit
 google-generativeai
-PyGithub
+pygithub
+faiss-cpu
+numpy
