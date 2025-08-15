@@ -110,9 +110,9 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
     with st.chat_message("assistant"):
         with st.spinner("Pensando..."):
             if st.session_state.chat is None:
-                # O usuário acaba de responder à mensagem de abertura. Inicia o chat.
+                # O usuário acabou de responder à mensagem de abertura. Inicia o chat.
                 vinheta_escolhida = random.choice(vinhetas)
-                prompt_completo = orientacoes + "\n" + "Vinheta escolhida para a entrevista: " + vinheta_escolhida
+                prompt_completo = orientacoes + "\n" + vinheta_escolhida
                 
                 st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo).start_chat()
                 
