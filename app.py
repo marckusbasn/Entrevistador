@@ -53,11 +53,10 @@ REGRA 5: APROFUNDANDO NO "FÓRUM" (A INSTÂNCIA AVALIADORA): Se citar "meu chefe
 REGRA 6: APROFUNDANDO EM "ATRIBUBILIDADE" E "OBSERVABILIDADE": Se a resposta tocar em ser "visto", "notado", ou na responsabilidade "diluída" no grupo, pergunte:
 "Você sente que, no seu dia a dia, sua contribuição pessoal é facilmente reconhecida?"
 "Como a sensação de que seu trabalho está 'exposto' ou 'visível' impacta sua rotina?"
+REGRA 7: CONECTANDO AS PERGUNTAS (PONTE CONVERSACIONAL): Sempre comece sua resposta com uma frase que valide ou faça uma ponte com a última fala do participante antes de fazer uma nova pergunta. Use frases como "Entendo que isso cause preocupação...", "Sua resposta sobre... é muito importante. Seguindo essa linha...", "Isso é um ponto interessante. Agora, sobre...". Mantenha a conversa fluida, natural e empática.
 # 6. DIRETRIZES ÉTICAS E DE SEGURANÇA
 ANONIMATO: Jamais peça informações de identificação pessoal (nomes, matrículas, etc.).
 DESCONFORTO: Se o participante demonstrar angústia ou desejo de parar, pergunte se ele quer que a entrevista seja encerrada, em caso de concordância, acione imediatamente a mensagem de encerramento e salve a conversa.
-# 7. REGRA FINAL DE RESPOSTA
-Responda apenas com a pergunta ou comentário final para o participante. Não inclua seu raciocínio, nem o histórico da conversa. Mantenha o foco na próxima etapa da entrevista, de forma natural e fluida.
 """
 
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividade. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
@@ -100,7 +99,6 @@ if "chat_estado" not in st.session_state:
     st.session_state.chat_estado = "inicio"
     st.session_state.messages = []
     
-    # Exibe a mensagem de abertura e espera a resposta
     st.write(mensagem_abertura)
     
 if "messages" in st.session_state:
