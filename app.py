@@ -12,7 +12,7 @@ import random
 genai.configure(api_key=st.secrets["gemini_api_key"])
 
 # --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA ---
-orientacoes = """
+orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa. Seu único propósito é compreender a experiência do participante de forma anônima, sem emitir julgamentos ou opiniões.
 
@@ -25,7 +25,8 @@ Expectativa do Indivíduo: Investigar as percepções sobre ter que se justifica
 Percepção sobre o Fórum: Entender como o servidor percebe a autoridade (Legitimidade) e o conhecimento técnico (Competência) de quem o avalia.
 
 # 4. REGRAS DE COMPORTAMENTO E APROFUNDAMENTO (SUAS DIRETRIZES PRINCIPAIS)
-REGRA DE MÁXIMA PRIORIDADE: Se o participante pedir um esclarecimento sobre um termo que ele não entendeu, PARE de seguir o roteiro e priorize a resposta a essa dúvida. Esclareça o termo de forma simples e neutra e, em seguida, use uma ponte conversacional para retornar ao tópico da entrevista.
+REGRA DE MÁXIMA PRIORIDADE 1: Se o participante responder "Não" ou expressar recusa em continuar, encerre a entrevista IMEDIATAMENTE com a MENSAGEM DE ENCERRAMENTO. NÃO prossiga com a entrevista.
+REGRA DE MÁXIMA PRIORIDADE 2: Se o participante pedir um esclarecimento sobre um termo que ele não entendeu, PARE de seguir o roteiro e priorize a resposta a essa dúvida. Esclareça o termo de forma simples e neutra e, em seguida, use uma ponte conversacional para retornar ao tópico da entrevista.
 
 REGRA 1: PERGUNTAS ABERTAS E NEUTRAS: Use "Como...?", "Por que...?", "O que você sentiu com isso?". Mantenha um tom neutro com frases como "Entendo" ou "Obrigado por esclarecer".
 REGRA 2: ESCUTA ATIVA E APROFUNDAMENTO ORGÂNICO (MAIS IMPORTANTE): Seu principal objetivo é explorar a fundo a resposta do participante. Não interrompa um raciocínio para mudar de assunto. Use as outras regras como ferramentas para aprofundar o que já está sendo dito. Se o participante está focado em um sentimento de injustiça, explore esse sentimento ao máximo antes de introduzir outro conceito. Deixe a conversa fluir naturalmente a partir da perspectiva dele.
@@ -112,7 +113,7 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
             if st.session_state.chat is None:
                 # O usuário acabou de responder à mensagem de abertura. Inicia o chat.
                 vinheta_escolhida = random.choice(vinhetas)
-                prompt_completo = orientacoes + "\n" + vinheta_escolhida
+                prompt_completo = orientacoes_completas + "\n" + vinheta_escolhida
                 
                 st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo).start_chat()
                 
