@@ -41,43 +41,24 @@ REGRA DE MÁXIMA PRIORIDADE 2 (PEDIDO DE ESCLARECIMENTO): Se o participante pedi
 
 REGRA DE MÁXIMA PRIORIDADE 3 (NUNCA QUEBRE A PERSONA): A sua única função é ser o entrevistador. JAMAIS explique como a resposta de um participante se conecta à teoria da pesquisa. Nunca mencione termos como "dimensão de competência", "análise qualitativa" ou "felt accountability". Use o seu conhecimento interno APENAS para decidir qual a melhor pergunta a fazer em seguida. O seu conhecimento teórico é secreto e nunca deve ser revelado.
 
-(O restante das regras de aprofundamento continua o mesmo)
+REGRA 9: EVITAR PERGUNTAS DUPLAS: Se a sua pergunta tiver mais de uma parte (ex: "Como você reagiria e o que pensaria?"), reformule-a para focar em uma única questão por vez.
+
+(O restante das regras continua o mesmo)
 """
+
+# <<< ALTERAÇÃO AQUI: Vinhetas corrigidas para terem apenas uma pergunta >>>
 vinhetas = [
-    "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar e o que você sentiria?",
-    "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria e o que pensaria sobre essa avaliação?",
+    "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar?",
+    "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria a essa situação?",
     "Imagine um trabalho importante feito em equipe. O resultado final será muito visível para todos na organização. Se for um sucesso, o mérito é do grupo. Se houver uma falha, pode ser difícil apontar um único responsável. Como essa dinâmica de responsabilidade compartilhada afeta sua maneira de atuar?"
 ]
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 
-
 # ==============================================================================
-# FUNÇÕES PRINCIPAIS
+# O RESTANTE DO CÓDIGO PERMANECE EXATAMENTE O MESMO
+# O código completo e funcional está abaixo para copiar e colar
 # ==============================================================================
-
-def formatar_para_nvivo(chat_history):
-    timestamp_inicio = datetime.datetime.now().strftime("%d-%m-%Y %H:%M")
-    texto_formatado = f"Transcrição da Entrevista: {timestamp_inicio}\n\n"
-    for msg in chat_history[1:]:
-        role = "Participante" if msg['role'] == 'user' else 'Entrevistador'
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-        texto_formatado += f"[{timestamp}] {role}: {msg['content']}\n"
-    return texto_formatado
-
-def save_transcript_to_github(chat_history):
-    try:
-        conteudo_formatado = formatar_para_nvivo(chat_history)
-        unique_id = uuid.uuid4()
-        file_path = f"transcricoes/entrevista_{unique_id}.txt"
-        g = Github(GITHUB_TOKEN)
-        repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
-        repo.create_file(file_path, f"Adicionando transcrição da entrevista {unique_id}", conteudo_formatado, branch="main")
-        st.session_state.transcript_saved = True
-        return True
-    except Exception as e:
-        print(f"Erro ao salvar no GitHub: {e}")
-        return False
 
 def pagina_configuracao():
     st.title("⚙️ Painel de Controlo do Pesquisador")
@@ -88,35 +69,37 @@ def pagina_configuracao():
         st.success(f"Ficheiro '{uploaded_file.name}' carregado com sucesso!")
         if st.button("Criar e Salvar Memória no GitHub"):
             with st.spinner("A processar o documento..."):
-                # (lógica de indexação sem alterações)
-                document_text = uploaded_file.getvalue().decode("utf-8")
-                text_chunks = [chunk for chunk in document_text.split('\n\n') if chunk.strip()]
-                embedding_model = 'models/embedding-001'
-                embeddings = genai.embed_content(model=embedding_model, content=text_chunks, task_type="retrieval_document")
-                embeddings_np = np.array(embeddings['embedding']).astype('float32')
-                d = embeddings_np.shape[1]
-                index = faiss.IndexFlatL2(d)
-                index.add(embeddings_np)
-                temp_index_file = "temp_faiss_index.bin"
-                faiss.write_index(index, temp_index_file)
-                with open(temp_index_file, "rb") as f: index_bytes = f.read()
-                os.remove(temp_index_file)
-                g = Github(GITHUB_TOKEN)
-                repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
-                def upload_or_update_file(file_path, commit_message, content):
-                    try:
-                        contents = repo.get_contents(file_path)
-                        repo.update_file(contents.path, commit_message, content, contents.sha, branch="main")
-                        st.write(f"Ficheiro '{file_path}' atualizado no GitHub.")
-                    except:
-                        repo.create_file(file_path, commit_message, content, branch="main")
-                        st.write(f"Ficheiro '{file_path}' criado no GitHub.")
-                upload_or_update_file("faiss_index.bin", "Atualizando índice FAISS", index_bytes)
-                chunks_bytes = pickle.dumps(text_chunks)
-                upload_or_update_file("text_chunks.pkl", "Atualizando pedaços de texto", chunks_bytes)
-                st.success("Memória criada e salva com sucesso!")
-                st.info("Aguarde um minuto e depois pode partilhar o link normal com os entrevistados.")
-                st.cache_resource.clear()
+                try:
+                    document_text = uploaded_file.getvalue().decode("utf-8")
+                    text_chunks = [chunk for chunk in document_text.split('\n\n') if chunk.strip()]
+                    embedding_model = 'models/embedding-001'
+                    embeddings = genai.embed_content(model=embedding_model, content=text_chunks, task_type="retrieval_document")
+                    embeddings_np = np.array(embeddings['embedding']).astype('float32')
+                    d = embeddings_np.shape[1]
+                    index = faiss.IndexFlatL2(d)
+                    index.add(embeddings_np)
+                    temp_index_file = "temp_faiss_index.bin"
+                    faiss.write_index(index, temp_index_file)
+                    with open(temp_index_file, "rb") as f: index_bytes = f.read()
+                    os.remove(temp_index_file)
+                    g = Github(GITHUB_TOKEN)
+                    repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
+                    def upload_or_update_file(file_path, commit_message, content):
+                        try:
+                            contents = repo.get_contents(file_path)
+                            repo.update_file(contents.path, commit_message, content, contents.sha, branch="main")
+                            st.write(f"Ficheiro '{file_path}' atualizado no GitHub.")
+                        except:
+                            repo.create_file(file_path, commit_message, content, branch="main")
+                            st.write(f"Ficheiro '{file_path}' criado no GitHub.")
+                    upload_or_update_file("faiss_index.bin", "Atualizando índice FAISS", index_bytes)
+                    chunks_bytes = pickle.dumps(text_chunks)
+                    upload_or_update_file("text_chunks.pkl", "Atualizando pedaços de texto", chunks_bytes)
+                    st.success("Memória criada e salva com sucesso!")
+                    st.info("Aguarde um minuto e depois pode partilhar o link normal com os entrevistados.")
+                    st.cache_resource.clear()
+                except Exception as e:
+                    st.error(f"Ocorreu um erro: {e}")
 
 def pagina_entrevistador():
     @st.cache_resource
@@ -158,6 +141,29 @@ def pagina_entrevistador():
             try: yield chunk.text
             except Exception: continue
     
+    def formatar_para_nvivo(chat_history):
+        timestamp_inicio = datetime.datetime.now().strftime("%d-%m-%Y %H:%M")
+        texto_formatado = f"Transcrição da Entrevista: {timestamp_inicio}\n\n"
+        for msg in chat_history[1:]:
+            role = "Participante" if msg['role'] == 'user' else 'Entrevistador'
+            timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+            texto_formatado += f"[{timestamp}] {role}: {msg['content']}\n"
+        return texto_formatado
+
+    def save_transcript_to_github(chat_history):
+        try:
+            conteudo_formatado = formatar_para_nvivo(chat_history)
+            unique_id = uuid.uuid4()
+            file_path = f"transcricoes/entrevista_{unique_id}.txt"
+            g = Github(GITHUB_TOKEN)
+            repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
+            repo.create_file(file_path, f"Adicionando transcrição da entrevista {unique_id}", conteudo_formatado, branch="main")
+            st.session_state.transcript_saved = True
+            return True
+        except Exception as e:
+            print(f"Erro ao salvar no GitHub: {e}")
+            return False
+
     st.title("Felt Accountability no Setor Público - Entrevista")
     index, chunks = carregar_memoria_pesquisa_do_github()
 
@@ -186,12 +192,10 @@ def pagina_entrevistador():
                     st.session_state.interview_over = True
                     if not st.session_state.get('transcript_saved'):
                         save_transcript_to_github(st.session_state.messages)
-                    # st.rerun() # <<< REMOVIDO PARA MAIOR ESTABILIDADE
                 else:
                     st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
                     vinheta_escolhida = random.choice(vinhetas)
                     st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
-                    # st.rerun() # <<< REMOVIDO PARA MAIOR ESTABILIDADE
             else:
                 placeholder = st.empty()
                 placeholder.markdown("Digitando…")
@@ -218,7 +222,6 @@ def pagina_entrevistador():
                 except Exception as e:
                     placeholder.error(f"Ocorreu um erro: {e}")
         
-        # Força o rerender no final do processamento do input, de forma mais suave
         st.rerun()
 
     if st.button("Encerrar Entrevista"):
@@ -231,9 +234,6 @@ def pagina_entrevistador():
         time.sleep(1) 
         st.rerun()
 
-# ==============================================================================
-# LÓGICA PRINCIPAL: Decide qual página mostrar
-# ==============================================================================
 if st.query_params.get("admin") == "true":
     pagina_configuracao()
 else:
