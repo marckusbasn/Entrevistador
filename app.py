@@ -25,6 +25,7 @@ orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa...
 """
+# (vinhetas, mensagem_abertura, mensagem_encerramento permanecem aqui)
 vinhetas = [
     "Imagine que você precisa entregar um relatório importante...",
     "Pense que um procedimento que você considera correto...",
@@ -54,29 +55,48 @@ def pagina_configuracao():
                     document_text = uploaded_file.getvalue().decode("utf-8")
                     text_chunks = [chunk for chunk in document_text.split('\n\n') if chunk.strip()]
                     
-                    # Gera os embeddings
                     embedding_model = 'models/embedding-001'
                     embeddings = genai.embed_content(model=embedding_model, content=text_chunks, task_type="retrieval_document")
                     embeddings_np = np.array(embeddings['embedding']).astype('float32')
                     
-                    # Cria o índice FAISS
                     d = embeddings_np.shape[1]
                     index = faiss.IndexFlatL2(d)
                     index.add(embeddings_np)
                     
-                    # Conecta-se ao GitHub
-                    g = Github(GITHUB_TOKEN)
-                    user = g.get_user(GITHUB_USER)
-                    repo = user.get_repo(REPO_NAME)
+                    # --- LÓGICA CORRIGIDA PARA SALVAR ---
+                    # 1. Salva o índice num ficheiro temporário local
+                    temp_index_file = "temp_faiss_index.bin"
+                    faiss.write_index(index, temp_index_file)
                     
-                    # Salva o índice FAISS no GitHub
-                    index_bytes = BytesIO()
-                    faiss.write_index(index, faiss.PyCallbackIOVecWriter(index_bytes.write))
-                    repo.create_file("faiss_index.bin", "Adicionando/atualizando índice FAISS", index_bytes.getvalue(), branch="main")
+                    # 2. Lê os bytes do ficheiro temporário
+                    with open(temp_index_file, "rb") as f:
+                        index_bytes = f.read()
+                    
+                    # 3. Apaga o ficheiro temporário
+                    os.remove(temp_index_file)
+
+                    g = Github(GITHUB_TOKEN)
+                    repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
+                    
+                    # 4. Faz o upload dos bytes para o GitHub
+                    # Tenta atualizar o ficheiro se ele já existir
+                    try:
+                        contents = repo.get_contents("faiss_index.bin")
+                        repo.update_file(contents.path, "Atualizando índice FAISS", index_bytes, contents.sha, branch="main")
+                        st.write("Índice FAISS atualizado no GitHub.")
+                    except:
+                        repo.create_file("faiss_index.bin", "Adicionando índice FAISS", index_bytes, branch="main")
+                        st.write("Índice FAISS criado no GitHub.")
 
                     # Salva os pedaços de texto no GitHub
                     chunks_bytes = pickle.dumps(text_chunks)
-                    repo.create_file("text_chunks.pkl", "Adicionando/atualizando pedaços de texto", chunks_bytes, branch="main")
+                    try:
+                        contents = repo.get_contents("text_chunks.pkl")
+                        repo.update_file(contents.path, "Atualizando pedaços de texto", chunks_bytes, contents.sha, branch="main")
+                        st.write("Pedaços de texto atualizados no GitHub.")
+                    except:
+                        repo.create_file("text_chunks.pkl", "Adicionando pedaços de texto", chunks_bytes, branch="main")
+                        st.write("Pedaços de texto criados no GitHub.")
 
                     st.success("Memória criada e salva com sucesso no seu repositório GitHub!")
                     st.info("Pode agora ir para a página 'Entrevistador'. A aplicação irá reiniciar para carregar a nova memória.")
@@ -84,11 +104,7 @@ def pagina_configuracao():
                     st.rerun()
 
                 except Exception as e:
-                    # Verifica se o erro é porque os ficheiros já existem
-                    if "sha" in str(e):
-                         st.warning("A memória parece já existir. Se quiser atualizá-la, por favor, apague os ficheiros 'faiss_index.bin' and 'text_chunks.pkl' do seu repositório GitHub e tente novamente.")
-                    else:
-                        st.error(f"Ocorreu um erro: {e}")
+                    st.error(f"Ocorreu um erro: {e}")
 
 # ==============================================================================
 # PÁGINA 1: ENTREVISTADOR (LÓGICA DO CHAT)
@@ -96,44 +112,74 @@ def pagina_configuracao():
 def pagina_entrevistador():
     st.title("Felt Accountability no Setor Público - Entrevista")
 
-    # --- Funções do Chat ---
     @st.cache_resource
     def carregar_memoria_pesquisa_do_github():
         try:
             g = Github(GITHUB_TOKEN)
-            user = g.get_user(GITHUB_USER)
-            repo = user.get_repo(REPO_NAME)
+            repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
             
+            # --- LÓGICA CORRIGIDA PARA CARREGAR ---
+            # 1. Obtém os bytes do índice do GitHub
             index_content = repo.get_contents("faiss_index.bin").decoded_content
-            index_bytes = BytesIO(index_content)
-            index = faiss.read_index(faiss.PyCallbackIOVecReader(index_bytes.read, index_bytes.tell, index_bytes.seek))
+            
+            # 2. Escreve os bytes num ficheiro temporário
+            temp_index_file = "temp_faiss_index_load.bin"
+            with open(temp_index_file, "wb") as f:
+                f.write(index_content)
+            
+            # 3. Lê o índice a partir do ficheiro temporário
+            index = faiss.read_index(temp_index_file)
+            
+            # 4. Apaga o ficheiro temporário
+            os.remove(temp_index_file)
 
             chunks_content = repo.get_contents("text_chunks.pkl").decoded_content
             chunks = pickle.loads(chunks_content)
             
+            st.sidebar.success("Memória da pesquisa carregada com sucesso!")
             return index, chunks
         except Exception as e:
-            # Se não encontrar os ficheiros, não é um erro, apenas a memória não foi criada.
-            st.sidebar.warning("A memória da pesquisa ainda não foi criada. O chatbot só poderá conduzir a entrevista. Para ativar as respostas sobre a pesquisa, vá à página de 'Configuração da Memória'.")
+            st.sidebar.warning("Memória da pesquisa não encontrada. Para ativar as respostas sobre a pesquisa, vá à página 'Configuração'.")
             return None, None
 
+    # O resto das funções (classificar_intencao, responder_pergunta_pesquisa, etc.)
+    # e a lógica principal da página do entrevistador permanecem exatamente as mesmas.
+    # Por brevidade, o código restante, que não sofreu alterações, é omitido.
+    # O bloco de código completo abaixo é funcional.
+    
     def classificar_intencao(prompt_utilizador):
-        # (código sem alterações)
-        pass
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        prompt_classificador = f"Analise a seguinte frase de um utilizador: '{prompt_utilizador}'.\nO utilizador está a fazer uma pergunta sobre a pesquisa (objetivos, metodologia, etc.) ou está a responder a uma pergunta da entrevista?\nResponda APENAS com a palavra 'PESQUISA' ou 'ENTREVISTA'."
+        try:
+            response = model.generate_content(prompt_classificador)
+            return response.text.strip()
+        except Exception:
+            return "ENTREVISTA"
 
     def responder_pergunta_pesquisa(index, chunks, pergunta):
-        # (código sem alterações)
-        pass
-    
+        embedding_model = 'models/embedding-001'
+        pergunta_embedding = genai.embed_content(model=embedding_model, content=pergunta, task_type="retrieval_query")['embedding']
+        k = 3
+        D, I = index.search(np.array([pergunta_embedding]).astype('float32'), k)
+        contexto_relevante = " ".join([chunks[i] for i in I[0]])
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        prompt_final = f"Com base no seguinte contexto extraído do projeto de pesquisa:\n---\n{contexto_relevante}\n---\nPor favor, responda à seguinte pergunta do utilizador de forma clara e concisa: \"{pergunta}\""
+        response = model.generate_content(prompt_final, stream=True)
+        return response
+
     def stream_handler(stream):
-        # (código sem alterações)
-        pass
+        for chunk in stream:
+            try: yield chunk.text
+            except Exception: continue
 
     def save_transcript_to_github(chat_history):
-        # (código sem alterações)
-        pass
+        g = Github(GITHUB_TOKEN)
+        repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
+        unique_id = uuid.uuid4()
+        file_path = f"transcricoes/entrevista_{unique_id}.json"
+        json_content = json.dumps(chat_history, ensure_ascii=False, indent=4)
+        repo.create_file(file_path, f"Adicionando transcrição da entrevista {unique_id}", json_content, branch="main")
 
-    # --- Lógica Principal da Aplicação ---
     index, chunks = carregar_memoria_pesquisa_do_github()
 
     if "model" not in st.session_state:
@@ -154,8 +200,17 @@ def pagina_entrevistador():
 
         with st.chat_message("assistant"):
             if st.session_state.model is None:
-                # (Lógica de início e consentimento, sem alterações)
-                pass
+                negative_responses = ["não", "nao", "não quero", "nao quero", "não, obrigado", "nao, obrigado"]
+                if prompt.lower().strip() in negative_responses:
+                    st.write(mensagem_encerramento)
+                    st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
+                    st.session_state.interview_over = True
+                    st.rerun() 
+                else:
+                    st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
+                    vinheta_escolhida = random.choice(vinhetas)
+                    st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
+                    st.rerun()
             else:
                 placeholder = st.empty()
                 placeholder.markdown("Digitando…")
@@ -164,17 +219,31 @@ def pagina_entrevistador():
                 
                 try:
                     if intencao == "PESQUISA" and index is not None:
-                        # (lógica RAG sem alterações)
-                        pass
+                        response_stream = responder_pergunta_pesquisa(index, chunks, prompt)
+                        text_generator = stream_handler(response_stream)
+                        full_response_text = placeholder.write_stream(text_generator)
+                        st.session_state.messages.append({"role": "model", "content": full_response_text})
                     else:
-                        # (lógica da entrevista sem alterações)
-                        pass
+                        start_index = 0
+                        for i, msg in enumerate(st.session_state.messages):
+                            if msg['content'] in vinhetas: start_index = i; break
+                        relevant_messages = st.session_state.messages[start_index:]
+                        history_for_api = [{'role': ('model' if msg['role'] == 'model' else 'user'), 'parts': [msg['content']]} for msg in relevant_messages]
+                        response_stream = st.session_state.model.generate_content(history_for_api, stream=True)
+                        text_generator = stream_handler(response_stream)
+                        full_response_text = placeholder.write_stream(text_generator)
+                        st.session_state.messages.append({"role": "model", "content": full_response_text})
                 except Exception as e:
                     placeholder.error(f"Ocorreu um erro: {e}")
 
     if st.button("Encerrar Entrevista"):
-        # (código sem alterações)
-        pass
+        with st.spinner("Salvando e encerrando..."):
+            st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
+            save_transcript_to_github(st.session_state.messages)
+            st.write(mensagem_encerramento)
+            st.session_state.interview_over = True
+        time.sleep(1) 
+        st.rerun()
 
 # ==============================================================================
 # ESTRUTURA PRINCIPAL DA APLICAÇÃO COM BARRA LATERAL
