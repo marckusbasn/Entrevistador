@@ -12,6 +12,8 @@ import random
 genai.configure(api_key=st.secrets["gemini_api_key"])
 
 # --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA ---
+# Documentação: Esta variável contém todas as regras e a persona que a IA deve seguir.
+# É o "cérebro" do entrevistador.
 orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa. Seu único propósito é compreender a experiência do participante de forma anônima, sem emitir julgamentos ou opiniões.
@@ -50,16 +52,19 @@ REGRA 11: APROFUNDAMENTO DINÂMICO E PRIORIZADO: Sua principal tarefa é explora
 REGRA 12: SIMPLIFICAR AS PERGUNTAS: Sempre que possível, formule perguntas curtas, diretas e focadas em um único conceito por vez. Evite frases longas ou complexas que possam confundir o participante.
 """
 
-# A mensagem de abertura e as vinhetas agora estão separadas
+# Documentação: Lista de cenários (vinhetas) que serão apresentados aleatoriamente ao utilizador para iniciar a entrevista.
 vinhetas = [
     "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar e o que você sentiria?",
     "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria e o que pensaria sobre essa avaliação?",
     "Imagine um trabalho importante feito em equipe. O resultado final será muito visível para todos na organização. Se for um sucesso, o mérito é do grupo. Se houver uma falha, pode ser difícil apontar um único responsável. Como essa dinâmica de responsabilidade compartilhada afeta sua maneira de atuar?"
 ]
+# Documentação: Mensagens padrão para iniciar e terminar a conversa.
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 
 # --- Funções ---
+# Documentação: Esta função é responsável por salvar o histórico da conversa (transcrição)
+# num ficheiro JSON no seu repositório do GitHub.
 def save_transcript_to_github(chat_history):
     repo_name = "Entrevistador" 
     branch_name = "main"
@@ -88,7 +93,9 @@ def save_transcript_to_github(chat_history):
 
 st.title("Chat Entrevistador de Pesquisa - UFF")
 
-# Inicializa o chat e o histórico de mensagens na sessão
+# Documentação: Inicializa o estado da sessão do Streamlit.
+# "chat" guardará o objeto da conversa com o Gemini.
+# "messages" é uma lista que guarda todo o histórico de diálogo.
 if "chat" not in st.session_state:
     st.session_state.chat = None
     st.session_state.messages = []
@@ -96,13 +103,13 @@ if "chat" not in st.session_state:
     st.session_state.messages.append({"role": "model", "content": mensagem_abertura})
 
 
-# Exibe o histórico da conversa
+# Documentação: Este loop exibe todas as mensagens do histórico na interface do chat.
 for message in st.session_state.messages:
     if message["role"] != "system":
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-# Processa a entrada do usuário
+# Documentação: Esta secção processa a nova entrada do utilizador.
 if prompt := st.chat_input("Sua resposta...", key="chat_input"):
     st.session_state.messages.append({"role": "user", "content": prompt})
 
@@ -111,23 +118,33 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
 
     with st.chat_message("assistant"):
         with st.spinner("Pensando..."):
+            # Documentação: Verifica se é a primeira mensagem do utilizador.
+            # Se "chat" ainda é None, significa que a conversa está a começar.
             if st.session_state.chat is None:
                 # O usuário acabou de responder à mensagem de abertura. Inicia o chat.
                 vinheta_escolhida = random.choice(vinhetas)
-                prompt_completo = orientacoes + "\n" + vinheta_escolhida
                 
+                # <<< CORREÇÃO AQUI >>>
+                # Juntamos as instruções completas com a vinheta para dar o contexto inicial à IA.
+                # O nome da variável foi corrigido de 'orientacoes' para 'orientacoes_completas'.
+                prompt_completo = orientacoes_completas + "\n" + vinheta_escolhida
+                
+                # Inicia o modelo generativo com as instruções do sistema (prompt_completo)
                 st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo).start_chat()
                 
+                # Envia a primeira resposta do utilizador para a IA.
                 response = st.session_state.chat.send_message(prompt)
                 
                 st.session_state.messages.append({"role": "model", "content": response.text})
                 st.write(response.text)
                 
             else:
+                # Documentação: Se o chat já existe, apenas envia a nova mensagem do utilizador.
                 response = st.session_state.chat.send_message(prompt)
                 st.session_state.messages.append({"role": "model", "content": response.text})
                 st.write(response.text)
 
+# Documentação: Lógica para o botão de encerramento da entrevista.
 if st.button("Encerrar Entrevista"):
     with st.spinner("Salvando e encerrando..."):
         # Adiciona a mensagem de encerramento ao histórico antes de salvar
