@@ -15,20 +15,16 @@ genai.configure(api_key=st.secrets["gemini_api_key"])
 orientacoes = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa. Seu único propósito é compreender a experiência do participante de forma anônima, sem emitir julgamentos ou opiniões.
-
 # 2. OBJETIVO PRINCIPAL
 Seu objetivo é conduzir uma entrevista qualitativa breve para compreender como a felt accountability (a percepção de ser avaliado e sofrer consequências) se manifesta no dia a dia da SUBCON/CGM-RJ. Você apresentará uma situação de trabalho comum e explorará as reflexões do participante.
-
 # 3. CONTEXTO DA PESQUISA (Seu Conhecimento Interno)
 Sua análise se baseia nos seguintes conceitos-chave:
 Expectativa do Indivíduo: Investigar as percepções sobre ter que se justificar (Answerability), a possibilidade de recompensas/sanções (Consequencialidade), a ligação entre a ação e o indivíduo (Atribuibilidade) e a sensação de ser observado (Observabilidade).
 Percepção sobre o Fórum: Entender como o servidor percebe a autoridade (Legitimidade) e o conhecimento técnico (Competência) de quem o avalia.
-
 # 4. ROTEIRO DA ENTREVISTA E SISTEMA DE ROTAÇÃO
 4.1. MENSAGEM DE ABERTURA (Fixa):
 Responda APENAS com a seguinte mensagem. Aguarde a resposta do participante antes de continuar:
 "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
-
 4.2. SELEÇÃO DA VINHETA (Sistema de Rotação):
 Após receber a primeira resposta do participante, selecione UMA das vinhetas abaixo e a apresente como a PRÓXIMA mensagem. NÃO INCLUA A MENSAGEM DE ABERTURA NOVAMENTE.
 
@@ -100,55 +96,30 @@ def save_transcript_to_github(chat_history):
 
 st.title("Chat Entrevistador de Pesquisa - UFF")
 
-if "chat_estado" not in st.session_state:
-    st.session_state.chat_estado = "inicio"
-    
-if "messages" not in st.session_state:
+# Inicializa o chat e o histórico de mensagens na sessão
+if "chat" not in st.session_state:
+    st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes).start_chat()
     st.session_state.messages = []
-
-# Lógica principal da conversa
-if st.session_state.chat_estado == "inicio":
-    st.session_state.messages.append({"role": "model", "content": "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"})
-    st.session_state.chat_estado = "aguardando_inicio"
     
+    st.session_state.messages.append({"role": "model", "content": "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"})
+
+# Exibe o histórico da conversa
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
+# Processa a entrada do usuário
 if prompt := st.chat_input("Sua resposta...", key="chat_input"):
-    
-    # Se a primeira mensagem for recebida, o chat é iniciado de fato
-    if st.session_state.chat_estado == "aguardando_inicio":
-        st.session_state.chat_estado = "entrevista_em_andamento"
-        
-        vinhetas = [
-            "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar e o que você sentiria?",
-            "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria e o que pensaria sobre essa avaliação?",
-            "Imagine um trabalho importante feito em equipe. O resultado final será muito visível para todos na organização. Se for um sucesso, o mérito é do grupo. Se houver uma falha, pode ser difícil apontar um único responsável. Como essa dinâmica de responsabilidade compartilhada afeta sua maneira de atuar?"
-        ]
-        vinheta_escolhida = random.choice(vinhetas)
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
-        prompt_completo = orientacoes + "\n" + vinheta_escolhida
-        
-        modelo = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo)
-        st.session_state.chat = modelo.start_chat()
+    with st.chat_message("user"):
+        st.write(prompt)
 
-        st.session_state.messages.append({"role": "user", "content": prompt})
-
-        primeira_resposta_ia = st.session_state.chat.send_message(prompt)
-        st.session_state.messages.append({"role": "model", "content": primeira_resposta_ia.text})
-
-        st.rerun()
-
-    elif st.session_state.chat_estado == "entrevista_em_andamento":
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.write(prompt)
-        with st.chat_message("assistant"):
-            with st.spinner("Pensando..."):
-                response = st.session_state.chat.send_message(prompt)
-                st.session_state.messages.append({"role": "model", "content": response.text})
-                st.write(response.text)
+    with st.chat_message("assistant"):
+        with st.spinner("Pensando..."):
+            response = st.session_state.chat.send_message(prompt)
+            st.session_state.messages.append({"role": "model", "content": response.text})
+            st.write(response.text)
 
 if st.button("Encerrar Entrevista e Salvar"):
     with st.spinner("Salvando entrevista no GitHub..."):
