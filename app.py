@@ -98,7 +98,6 @@ if "chat" not in st.session_state:
     st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes).start_chat()
     st.session_state.messages = []
     
-    # A primeira mensagem é adicionada ao histórico aqui, garantindo que não seja repetida.
     st.session_state.messages.append({"role": "model", "content": "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"})
 
 # Exibe o histórico da conversa
