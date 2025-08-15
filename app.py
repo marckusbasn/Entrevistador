@@ -52,8 +52,6 @@ REGRA 10: LIDANDO COM RESPOSTAS DESCONEXAS: Se a resposta do participante for am
 REGRA 11: APROFUNDAMENTO DINÂMICO E PRIORIZADO: Sua principal tarefa é explorar a fundo a última resposta do participante. Não passe para a próxima pergunta da vinheta ou para um novo tópico sem antes esgotar o que o participante disse. Baseie suas perguntas no conteúdo, buscando exemplos, sentimentos e razões por trás das respostas. Use frases como "Poderia me dar um exemplo de...?", "O que você sentiu exatamente quando...?", "Por que você acha que isso acontece?".
 REGRA 12: SIMPLIFICAR AS PERGUNTAS: Sempre que possível, formule perguntas curtas, diretas e focadas em um único conceito por vez. Evite frases longas ou complexas que possam confundir o participante.
 """
-
-# Documentação: Lista de cenários (vinhetas) que serão apresentados aleatoriamente ao utilizador para iniciar a entrevista.
 vinhetas = [
     "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar e o que você sentiria?",
     "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria e o que pensaria sobre essa avaliação?",
@@ -62,7 +60,6 @@ vinhetas = [
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 
-# --- Funções ---
 def save_transcript_to_github(chat_history):
     repo_name = "Entrevistador" 
     branch_name = "main"
@@ -100,57 +97,30 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("Pensando..."):
-            # <<< GRANDE MUDANÇA DE LÓGICA AQUI >>>
-            # Se o chat não foi iniciado, isso significa que o utilizador acabou de responder "sim" para começar.
+        # O spinner agora é removido, pois o streaming dá feedback imediato.
+        # with st.spinner("Pensando..."):
             if st.session_state.chat is None:
-                # 1. Inicia o modelo com as instruções de sistema (a persona).
                 model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
-                st.session_state.chat = model.start_chat(history=[]) # Inicia com histórico vazio
-
-                # 2. A aplicação escolhe e apresenta a vinheta como a primeira fala do modelo.
+                st.session_state.chat = model.start_chat(history=[])
                 vinheta_escolhida = random.choice(vinhetas)
                 st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
                 st.write(vinheta_escolhida)
-                
-            # Se o chat já existe, a conversa continua normalmente.
             else:
-                # O histórico que enviamos para a API não precisa incluir a mensagem de abertura.
-                # Apenas o diálogo relevante a partir da vinheta.
-                history_for_api = [msg for msg in st.session_state.messages if msg['content'] not in [mensagem_abertura]]
+                # <<< ALTERAÇÃO PARA STREAMING AQUI >>>
+                try:
+                    # 1. Adiciona stream=True para pedir a resposta em pedaços.
+                    response_stream = st.session_state.chat.send_message(prompt, stream=True)
+                    
+                    # 2. Usa st.write_stream para exibir os pedaços em tempo real.
+                    # A função já lida com o loop e a exibição.
+                    # Ela também retorna o texto completo no final.
+                    full_response_text = st.write_stream(response_stream)
+                    
+                    # 3. Adiciona a resposta completa ao histórico da sessão.
+                    st.session_state.messages.append({"role": "model", "content": full_response_text})
 
-                # Lógica de retentativa para lidar com erros de limite de taxa.
-                response = None
-                max_retries = 3
-                delay_seconds = 2
-                
-                for attempt in range(max_retries):
-                    try:
-                        # Envia o histórico relevante e a nova mensagem para a API
-                        st.session_state.chat.history = [
-                            {'role': 'user' if msg['role'] == 'user' else 'model', 'parts': [msg['content']]}
-                            for msg in history_for_api
-                        ]
-                        response = st.session_state.chat.send_message(prompt)
-                        break 
-                    except google.api_core.exceptions.ResourceExhausted:
-                        if attempt < max_retries - 1:
-                            st.warning(f"Limite de pedidos atingido. Tentando novamente em {delay_seconds} segundos...")
-                            time.sleep(delay_seconds)
-                            delay_seconds *= 2
-                        else:
-                            st.error("O serviço está sobrecarregado no momento. Por favor, tente novamente dentro de um minuto.")
-                            response = None
-                    except Exception as e:
-                        st.error(f"Ocorreu um erro inesperado: {e}")
-                        response = None
-                        break
-                
-                if response:
-                    # Adiciona a resposta do modelo ao histórico para ser exibida.
-                    response_text = response.text
-                    st.session_state.messages.append({"role": "model", "content": response_text})
-                    st.write(response_text)
+                except Exception as e:
+                    st.error(f"Ocorreu um erro ao comunicar com a API: {e}")
 
 # Lógica para o botão de encerramento da entrevista.
 if st.button("Encerrar Entrevista"):
