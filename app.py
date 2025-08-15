@@ -59,7 +59,7 @@ DESCONFORTO: Se o participante demonstrar angústia ou desejo de parar, pergunte
 """
 
 # Mensagem de abertura fixa (novo prompt)
-mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
+mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividade. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 
 # Vinhetas para o sistema de rotação
 vinhetas = [
@@ -75,7 +75,6 @@ vinhetas = [
 def save_transcript_to_github(chat_history):
     """Salva o histórico do chat em um arquivo JSON e faz o commit no GitHub."""
     
-    # Preenchido com o nome do seu repositório
     repo_name = "Entrevistador" 
     branch_name = "main"
 
@@ -102,7 +101,7 @@ def save_transcript_to_github(chat_history):
         return f"Erro ao salvar no GitHub: {e}"
 
 # --- Lógica do Streamlit ---
-st.title("Entrevistador de Pesquisa")
+st.title("Felt accountability no setor público - Entrevista")
 
 # Inicializa o chat na sessão do Streamlit, e o estado da conversa
 if "chat_estado" not in st.session_state:
@@ -123,19 +122,17 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
     if st.session_state.chat_estado == "inicio":
         st.session_state.chat_estado = "entrevista"
         
-        # Seleciona uma vinheta aleatória e a anexa ao prompt
         vinheta_escolhida = random.choice(vinhetas)
+        
         prompt_completo = orientacoes + "\n" + vinheta_escolhida
         
-        # Inicia o modelo com o novo prompt
         modelo = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo)
         st.session_state.chat = modelo.start_chat()
         
-        # Adiciona a primeira resposta do usuário e a vinheta ao histórico
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
-
-        st.experimental_rerun()
+        
+        st.rerun() # <-- CORREÇÃO: Usando st.rerun()
     
     else: # O estado é 'entrevista'
         st.session_state.messages.append({"role": "user", "content": prompt})
@@ -153,4 +150,4 @@ if st.button("Encerrar Entrevista e Salvar"):
         st.write(status_message)
     st.session_state.clear()
     time.sleep(2)
-    st.experimental_rerun()
+    st.rerun() # <-- CORREÇÃO: Usando st.rerun()
