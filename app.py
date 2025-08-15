@@ -12,7 +12,7 @@ import random
 genai.configure(api_key=st.secrets["gemini_api_key"])
 
 # --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA ---
-orientacoes_completas = """
+orientacoes = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa. Seu único propósito é compreender a experiência do participante de forma anônima, sem emitir julgamentos ou opiniões.
 
@@ -112,7 +112,7 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
             if st.session_state.chat is None:
                 # O usuário acaba de responder à mensagem de abertura. Inicia o chat.
                 vinheta_escolhida = random.choice(vinhetas)
-                prompt_completo = orientacoes_completas + "\n" + vinheta_escolhida
+                prompt_completo = orientacoes + "\n" + "Vinheta escolhida para a entrevista: " + vinheta_escolhida
                 
                 st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo).start_chat()
                 
