@@ -26,7 +26,7 @@ Expectativa do Indivíduo: Investigar as percepções sobre ter que se justifica
 Percepção sobre o Fórum: Entender como o servidor percebe a autoridade (Legitimidade) e o conhecimento técnico (Competência) de quem o avalia.
 
 # 4. REGRAS DE COMPORTAMENTO E APROFUNDAMENTO (SUAS DIRETRIZES PRINCIPAIS)
-REGRA DE MÁXIMA PRIORIDADE 1: Se o participante responder "Não" ou expressar recusa em continuar, encerre a entrevista IMEDIATAMENTE com a MENSAGEM DE ENCERRAMENTO. NÃO prossiga com a entrevista.
+REGRA DE MÁXIMA PRIORIDADE 1: A entrevista só deve ser encerrada se o participante expressar CLARAMENTE que não quer mais participar. Frases como "Não quero continuar", "Pode encerrar", ou uma resposta negativa e isolada ("Não.") à pergunta inicial "Podemos começar?" são motivos para encerrar. Respostas curtas ou negativas a uma pergunta do cenário, como "Não faria nada" ou "Isso não me afeta", NÃO SÃO motivos para encerrar. Pelo contrário, são excelentes oportunidades para aprofundar, perguntando "Entendo. Poderia me dizer por que você sente que não faria nada nessa situação?".
 REGRA DE MÁXIMA PRIORIDADE 2: Se o participante pedir um esclarecimento sobre um termo que ele não entendeu, PARE de seguir o roteiro e priorize a resposta a essa dúvida. Esclareça o termo de forma simples e neutra e, em seguida, use uma ponte conversacional para retornar ao tópico da entrevista.
 
 REGRA 1: PERGUNTAS ABERTAS E NEUTRAS: Use "Como...?", "Por que...?", "O que você sentiu com isso?". Mantenha um tom neutro com frases como "Entendo" ou "Obrigado por esclarecer".
@@ -63,7 +63,6 @@ def stream_handler(stream):
         try:
             yield chunk.text
         except Exception:
-            # Lida com chunks vazios ou problemáticos no final do stream
             continue
 
 def save_transcript_to_github(chat_history):
@@ -87,7 +86,6 @@ def save_transcript_to_github(chat_history):
 
 st.title("Chat Entrevistador de Pesquisa - UFF")
 
-# <<< MUDANÇA 1: Não guardamos mais o 'chat', mas sim o 'model' >>>
 if "model" not in st.session_state:
     st.session_state.model = None
     st.session_state.messages = []
@@ -104,40 +102,29 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        # Se o modelo não foi inicializado, fazemo-lo agora.
         if st.session_state.model is None:
-            # Inicializa o modelo com as instruções de sistema
             st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
-            
-            # A aplicação escolhe e apresenta a vinheta
             vinheta_escolhida = random.choice(vinhetas)
             st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
-            st.rerun() # Reroda o script para exibir a vinheta
-        
-        # A conversa continua
+            st.rerun() 
         else:
             placeholder = st.empty()
             placeholder.markdown("Digitando…")
             
             try:
-                # <<< MUDANÇA 2: Preparamos o histórico manualmente >>>
-                # Encontra o início da conversa real (a vinheta)
                 start_index = 0
                 for i, msg in enumerate(st.session_state.messages):
                     if msg['content'] in vinhetas:
                         start_index = i
                         break
                 
-                # Seleciona apenas as mensagens relevantes
                 relevant_messages = st.session_state.messages[start_index:]
 
-                # Converte para o formato que a API espera
                 history_for_api = []
                 for msg in relevant_messages:
                     role = 'model' if msg['role'] == 'model' else 'user'
                     history_for_api.append({'role': role, 'parts': [msg['content']]})
 
-                # <<< MUDANÇA 3: Usamos model.generate_content em vez de chat.send_message >>>
                 response_stream = st.session_state.model.generate_content(history_for_api, stream=True)
                 
                 text_generator = stream_handler(response_stream)
