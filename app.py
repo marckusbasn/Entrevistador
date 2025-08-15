@@ -25,6 +25,8 @@ Expectativa do Indivíduo: Investigar as percepções sobre ter que se justifica
 Percepção sobre o Fórum: Entender como o servidor percebe a autoridade (Legitimidade) e o conhecimento técnico (Competência) de quem o avalia.
 
 # 4. REGRAS DE COMPORTAMENTO E APROFUNDAMENTO (SUAS DIRETRIZES PRINCIPAIS)
+REGRA DE MÁXIMA PRIORIDADE: Se o participante pedir um esclarecimento sobre um termo que ele não entendeu, PARE de seguir o roteiro e priorize a resposta a essa dúvida. Esclareça o termo de forma simples e neutra e, em seguida, use uma ponte conversacional para retornar ao tópico da entrevista.
+
 REGRA 1: PERGUNTAS ABERTAS E NEUTRAS: Use "Como...?", "Por que...?", "O que você sentiu com isso?". Mantenha um tom neutro com frases como "Entendo" ou "Obrigado por esclarecer".
 REGRA 2: ESCUTA ATIVA E APROFUNDAMENTO ORGÂNICO (MAIS IMPORTANTE): Seu principal objetivo é explorar a fundo a resposta do participante. Não interrompa um raciocínio para mudar de assunto. Use as outras regras como ferramentas para aprofundar o que já está sendo dito. Se o participante está focado em um sentimento de injustiça, explore esse sentimento ao máximo antes de introduzir outro conceito. Deixe a conversa fluir naturalmente a partir da perspectiva dele.
 REGRA 3: APROFUNDANDO EM "ANSWERABILITY": Se o participante mencionar "explicar", "justificar", "defender", "apresentar", pergunte:
@@ -81,8 +83,24 @@ def save_transcript_to_github(chat_history):
     except Exception as e:
         return f"Erro ao salvar no GitHub: {e}"
 
-# --- Lógica do Streamlit ---
+# Adiciona um callback para salvar quando a sessão termina
+def on_session_end():
+    if "messages" in st.session_state and st.session_state.messages:
+        try:
+            save_transcript_to_github(st.session_state.messages)
+        except Exception as e:
+            print(f"Erro ao salvar no encerramento da sessão: {e}")
+
 st.title("Chat Entrevistador de Pesquisa - UFF")
+# st.on_session_end(on_session_end) # Esta função foi depreciada em versões mais recentes do Streamlit
+
+# Lógica para salvar automaticamente no final da sessão (método alternativo)
+if "session_ended_flag" not in st.session_state:
+    st.session_state.session_ended_flag = False
+
+if st.session_state.session_ended_flag:
+    on_session_end()
+    st.session_state.session_ended_flag = False
 
 # Inicializa o chat e o histórico de mensagens na sessão
 if "chat" not in st.session_state:
@@ -108,28 +126,24 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
     with st.chat_message("assistant"):
         with st.spinner("Pensando..."):
             if st.session_state.chat is None:
-                # O usuário acabou de responder à mensagem de abertura. Inicia o chat.
                 vinheta_escolhida = random.choice(vinhetas)
                 prompt_completo = orientacoes_completas + "\n" + vinheta_escolhida
                 
                 st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo).start_chat()
                 
-                # A primeira mensagem da IA será a vinheta
                 response = st.session_state.chat.send_message(prompt)
                 
                 st.session_state.messages.append({"role": "model", "content": response.text})
                 st.write(response.text)
                 
             else:
-                # O chat já foi iniciado, a conversa segue normalmente
                 response = st.session_state.chat.send_message(prompt)
                 st.session_state.messages.append({"role": "model", "content": response.text})
                 st.write(response.text)
 
-if st.button("Encerrar Entrevista e Salvar"):
-    with st.spinner("Salvando entrevista no GitHub..."):
-        status_message = save_transcript_to_github(st.session_state.messages)
-        st.write(status_message)
+if st.button("Encerrar Entrevista"):
+    st.session_state.session_ended_flag = True
+    on_session_end()
     st.session_state.clear()
     time.sleep(2)
     st.rerun()
