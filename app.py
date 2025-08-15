@@ -58,13 +58,8 @@ vinhetas = [
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 
-# <<< NOVA FUNÇÃO-AJUDANTE AQUI >>>
-# Documentação: Esta função recebe o stream de objetos da API Gemini
-# e transforma-o num stream de texto simples que o Streamlit consegue entender.
 def stream_handler(stream):
     for chunk in stream:
-        # A palavra-chave 'yield' transforma a função num gerador,
-        # que produz valores um de cada vez.
         yield chunk.text
 
 def save_transcript_to_github(chat_history):
@@ -111,18 +106,25 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
             st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
             st.write(vinheta_escolhida)
         else:
+            # <<< MELHORIA DE EXPERIÊNCIA DO UTILIZADOR AQUI >>>
+            # 1. Cria um espaço reservado na tela.
+            placeholder = st.empty()
+            # 2. Mostra uma mensagem de "a pensar" imediatamente.
+            placeholder.markdown("Digitando…")
+            
             try:
                 response_stream = st.session_state.chat.send_message(prompt, stream=True)
                 
-                # <<< MUDANÇA NA CHAMADA AQUI >>>
-                # Agora, passamos o stream pela nossa função-ajudante antes de entregar ao Streamlit.
                 text_generator = stream_handler(response_stream)
-                full_response_text = st.write_stream(text_generator)
+                
+                # 3. Manda o stream para o espaço reservado, que irá substituir o "Digitando..."
+                full_response_text = placeholder.write_stream(text_generator)
                 
                 st.session_state.messages.append({"role": "model", "content": full_response_text})
 
             except Exception as e:
-                st.error(f"Ocorreu um erro ao comunicar com a API: {e}")
+                # Se der erro, mostra o erro no mesmo placeholder.
+                placeholder.error(f"Ocorreu um erro ao comunicar com a API: {e}")
 
 if st.button("Encerrar Entrevista"):
     with st.spinner("Salvando e encerrando..."):
