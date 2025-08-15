@@ -1,0 +1,146 @@
+[
+    {
+        "role": "model",
+        "content": "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
+    },
+    {
+        "role": "user",
+        "content": "Sim"
+    },
+    {
+        "role": "model",
+        "content": "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar e o que você sentiria?"
+    },
+    {
+        "role": "user",
+        "content": "Eu ficaria um pouco nervoso e eu ficaria bem focado no trabalho, afetendo minha rotina."
+    },
+    {
+        "role": "model",
+        "content": "Entendo que isso causaria nervosismo e foco intenso no trabalho, afetando sua rotina.  Poderia me dar um exemplo de como esse foco intenso afetaria sua rotina diária?\n"
+    },
+    {
+        "role": "user",
+        "content": "Talvez eu não conseguiria me desligar. Comeria rápido só para voltar para o trabalho."
+    },
+    {
+        "role": "model",
+        "content": "Sua resposta sobre a dificuldade de se desligar do trabalho, mesmo para atividades básicas como o almoço, é muito importante.  Seguindo essa linha, o que você sente que é esperado de você nesse processo de entrega do relatório, e como isso contribui para essa pressão que você descreveu?\n"
+    },
+    {
+        "role": "user",
+        "content": "Acho que é esperado o máximo empenho. Isso geraria uma certa tensão em mim porque seria muita expectativa em cima de mim."
+    },
+    {
+        "role": "model",
+        "content": "Entendo.  Quando você pensa em \"consequência negativa\" por não conseguir entregar o relatório no prazo ou com a qualidade esperada, o que vem à sua mente? É algo formal (como uma advertência, por exemplo), ou mais ligado à sua reputação dentro da SUBCON/CGM-RJ?\n"
+    },
+    {
+        "role": "user",
+        "content": "É mais uma consequência reputacional mesmo. "
+    },
+    {
+        "role": "model",
+        "content": "Interessante. E a possibilidade de um reconhecimento positivo pela entrega bem-sucedida do relatório, muda a forma como você encara essa pressão?  Como esse reconhecimento positivo influenciaria sua percepção da situação?\n"
+    },
+    {
+        "role": "user",
+        "content": "Não faria diferença para mim. Só cumpro meu dever."
+    },
+    {
+        "role": "model",
+        "content": "Entendo. Poderia me dizer por que você sente que um reconhecimento positivo não faria diferença nessa situação, mesmo considerando a alta pressão e a expectativa envolvidas?\n"
+    },
+    {
+        "role": "user",
+        "content": "Porque não vou gananhar nada."
+    },
+    {
+        "role": "model",
+        "content": "Entendo.  Considerando que não há ganho adicional, apenas o cumprimento do dever, como você avalia a legitimidade da cobrança da sua chefia e dos outros gestores nesse caso?  Você sente que eles têm a autoridade para fazer esse tipo de cobrança? Por quê?\n"
+    },
+    {
+        "role": "user",
+        "content": "Claro eles são nomeados "
+    },
+    {
+        "role": "model",
+        "content": "Obrigado por esclarecer.  Considerando a autoridade da sua chefia, na sua opinião,  essas pessoas têm o conhecimento técnico necessário para avaliar seu trabalho e a sua contribuição de forma justa?\n"
+    },
+    {
+        "role": "user",
+        "content": "Não acho. "
+    },
+    {
+        "role": "model",
+        "content": "Entendo.  Poderia me explicar o porquê de você achar que a sua chefia não possui o conhecimento técnico necessário para avaliar seu trabalho de forma justa?  Quais seriam os motivos para essa percepção?\n"
+    },
+    {
+        "role": "user",
+        "content": "Eles não parecem saber o que fazem sem apoio de outros servidores"
+    },
+    {
+        "role": "model",
+        "content": "A frase \"Eles não parecem saber o que fazem sem apoio de outros servidores\" sugere uma possível falta de competência individual ou de capacitação adequada dos servidores, dependendo do contexto.  A pesquisa mencionada investigaria isso através da análise da dimensão \"competência\" da *felt accountability*, correlacionando-a com variáveis como tempo de serviço e escolaridade.  A análise qualitativa, por sua vez, poderia elucidar as razões por trás dessa percepção.\n"
+    },
+    {
+        "role": "user",
+        "content": "Não entendi"
+    },
+    {
+        "role": "model",
+        "content": "Por favor, especifique o que você não entendeu.  Precisa de mais informações sobre qual parte do projeto de pesquisa?\n"
+    },
+    {
+        "role": "user",
+        "content": "Sua resposta"
+    },
+    {
+        "role": "model",
+        "content": "Sua resposta: O projeto de pesquisa descreve um estudo de métodos mistos convergentes para investigar a *felt accountability* em servidores públicos da Subcontroladoria de Contabilidade da Controladoria Geral do Município do Rio de Janeiro (SUBCON/CGM-RJ).  Utilizará censo com questionário (escala Likert de 7 pontos) e questão aberta, analisando dados quantitativos e qualitativos (análise temática) de forma integrada.  A pesquisa justifica-se pela posição estratégica da SUBCON e pelo duplo papel de seus servidores, e visa preencher uma lacuna na literatura brasileira sobre *felt accountability* no setor público.\n"
+    },
+    {
+        "role": "user",
+        "content": "Eu não perguntei nada sobre a pesquisa"
+    },
+    {
+        "role": "model",
+        "content": "Você está certo. Peço desculpas.  Minha resposta anterior foi inadequada e descontextualizada.  Voltemos à nossa conversa sobre a sua experiência.  Considerando sua afirmação de que sua chefia não possui o conhecimento técnico para avaliar seu trabalho de forma justa, você sente que sua contribuição pessoal nesse relatório é facilmente reconhecida, mesmo com a pressão de entrega?\n"
+    },
+    {
+        "role": "user",
+        "content": "Os meus chefes reconhecem os meus esforços, mas logo esquecem."
+    },
+    {
+        "role": "model",
+        "content": "Entendo que seus chefes reconhecem seus esforços, mas que esse reconhecimento é efêmero.  Como essa percepção de reconhecimento transitório impacta sua rotina de trabalho e a forma como você encara a pressão de entregar o relatório?\n"
+    },
+    {
+        "role": "user",
+        "content": "Não afeta em nada"
+    },
+    {
+        "role": "model",
+        "content": "Entendo. Poderia me explicar por que a percepção de um reconhecimento transitório não afeta sua rotina de trabalho ou sua forma de lidar com a pressão de entregar o relatório?\n"
+    },
+    {
+        "role": "user",
+        "content": "Cansei já, está muito longa"
+    },
+    {
+        "role": "model",
+        "content": "Entendido. Apenas para confirmar, podemos encerrar a entrevista por aqui?\n"
+    },
+    {
+        "role": "user",
+        "content": "Sim"
+    },
+    {
+        "role": "model",
+        "content": "Agradeço sua participação. A entrevista está encerrada.  Sua contribuição foi muito valiosa para a pesquisa.\n"
+    },
+    {
+        "role": "model",
+        "content": "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
+    }
+]
