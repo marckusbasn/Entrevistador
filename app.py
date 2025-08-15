@@ -102,7 +102,7 @@ def save_transcript_to_github(chat_history):
         return f"Erro ao salvar no GitHub: {e}"
 
 # --- Lógica do Streamlit ---
-st.title("Chat Entrevistador de Pesquisa - UFF")
+st.title("Entrevistador de Pesquisa")
 
 # Inicializa o chat na sessão do Streamlit, e o estado da conversa
 if "chat_estado" not in st.session_state:
