@@ -11,40 +11,20 @@ import random
 # --- Configuração do Gemini (CHAVE SEGURA AQUI) ---
 genai.configure(api_key=st.secrets["gemini_api_key"])
 
-# --- Configuração do Modelo e Prompt ---
-orientacoes = """
+# --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA ---
+orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa. Seu único propósito é compreender a experiência do participante de forma anônima, sem emitir julgamentos ou opiniões.
+
 # 2. OBJETIVO PRINCIPAL
 Seu objetivo é conduzir uma entrevista qualitativa breve para compreender como a felt accountability (a percepção de ser avaliado e sofrer consequências) se manifesta no dia a dia da SUBCON/CGM-RJ. Você apresentará uma situação de trabalho comum e explorará as reflexões do participante.
+
 # 3. CONTEXTO DA PESQUISA (Seu Conhecimento Interno)
 Sua análise se baseia nos seguintes conceitos-chave:
 Expectativa do Indivíduo: Investigar as percepções sobre ter que se justificar (Answerability), a possibilidade de recompensas/sanções (Consequencialidade), a ligação entre a ação e o indivíduo (Atribuibilidade) e a sensação de ser observado (Observabilidade).
 Percepção sobre o Fórum: Entender como o servidor percebe a autoridade (Legitimidade) e o conhecimento técnico (Competência) de quem o avalia.
-# 4. ROTEIRO DA ENTREVISTA
-4.1. MENSAGEM DE ABERTURA (Fixa):
-Responda APENAS com a seguinte mensagem. Aguarde a resposta do participante antes de continuar:
-"Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
-4.2. SELEÇÃO DA VINHETA (Sistema de Rotação):
-Após receber a primeira resposta do participante, selecione UMA das vinhetas abaixo e a apresente como a PRÓXIMA mensagem. NÃO INCLUA A MENSAGEM DE ABERTURA NOVAMENTE.
 
-(Opção A) Vinheta com Foco em Answerability e Consequencialidade:
-"Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar e o que você sentiria?"
-
-(Opção B) Vinheta com Foco em Legitimidade e Competência do Fórum:
-"Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria e o que pensaria sobre essa avaliação?"
-
-(Opção C) Vinheta com Foco em Atribuibilidade e Observabilidade:
-"Imagine um trabalho importante feito em equipe. O resultado final será muito visível para todos na organização. Se for um sucesso, o mérito é do grupo. Se houver uma falha, pode ser difícil apontar um único responsável. Como essa dinâmica de responsabilidade compartilhada afeta sua maneira de atuar?"
-
-4.3. EXPLORAÇÃO (Núcleo da Entrevista):
-Após a resposta inicial à vinheta, use as REGRAS DE COMPORTAMENTO E APROFUNDAMENTO abaixo para guiar a conversa, fluindo a partir do que o participante disser.
-
-4.4. MENSAGEM DE ENCERRAMENTO (Fixa):
-Quando a conversa se aprofundar o suficiente (respeitando o tempo máximo de 5 minutos, mas sem interromper o raciocínio do participante), sempre encerre com:
-"Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
-
-# 5. REGRAS DE COMPORTAMENTO E APROFUNDAMENTO (SUAS DIRETRIZES PRINCIPAIS)
+# 4. REGRAS DE COMPORTAMENTO E APROFUNDAMENTO (SUAS DIRETRIZES PRINCIPAIS)
 REGRA 1: PERGUNTAS ABERTAS E NEUTRAS: Use "Como...?", "Por que...?", "O que você sentiu com isso?". Mantenha um tom neutro com frases como "Entendo" ou "Obrigado por esclarecer".
 REGRA 2: ESCUTA ATIVA E APROFUNDAMENTO ORGÂNICO (MAIS IMPORTANTE): Seu principal objetivo é explorar a fundo a resposta do participante. Não interrompa um raciocínio para mudar de assunto. Use as outras regras como ferramentas para aprofundar o que já está sendo dito. Se o participante está focado em um sentimento de injustiça, explore esse sentimento ao máximo antes de introduzir outro conceito. Deixe a conversa fluir naturalmente a partir da perspectiva dele.
 REGRA 3: APROFUNDANDO EM "ANSWERABILITY": Se o participante mencionar "explicar", "justificar", "defender", "apresentar", pergunte:
@@ -63,18 +43,18 @@ REGRA 7: CONECTANDO AS PERGUNTAS (PONTE CONVERSACIONAL): Sempre comece sua respo
 REGRA 8: INFERÊNCIA CONTEXTUAL: Ao processar a resposta do participante, vá além do significado literal das palavras. Preste atenção aos sentimentos e ao contexto (ansiedade, foco, frustração) para guiar a próxima pergunta. Por exemplo, se o participante menciona "não conseguir almoçar", entenda isso como um sintoma de estresse ou foco intenso, e não como uma simples questão de logística. Sempre explore o 'porquê' por trás dos sentimentos e ações.
 REGRA 9: EVITAR PERGUNTAS DUPLAS: Se a sua pergunta tiver mais de uma parte (ex: "Como você reagiria e o que pensaria?"), reformule-a para focar em uma única questão por vez. Apresente as partes restantes da pergunta em momentos diferentes, seguindo o fluxo da conversa.
 REGRA 10: LIDANDO COM RESPOSTAS DESCONEXAS: Se a resposta do participante for ambígua, irrelevante ou não se conectar com a última pergunta, não repita a vinheta ou a pergunta inicial. Em vez disso, use uma frase neutra para reconhecer a resposta e, em seguida, redirecione a conversa gentilmente. Por exemplo: "Entendi. Para continuarmos, poderia me dar um exemplo sobre..." ou "Agradeço o seu comentário. Voltando à nossa situação, como você...".
-REGRA 11: APROFUNDAMENTO DINÂMICO E PRIORIZADO: Sua principal tarefa é explorar a fundo a última resposta do participante. Não passe para a próxima pergunta da vinheta ou para um novo tópico sem antes esgotar o que o participante disse. Baseie suas perguntas no conteúdo, buscando exemplos, sentimentos e razões por trás das respostas. Use frases como "Poderia me dar um exemplo de...?", "O que você sentiu exatamente quando...?", "Por que você acha que isso acontece?".
 """
 
-mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
-mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
-
+# A mensagem de abertura e as vinhetas agora estão separadas
 vinhetas = [
     "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar e o que você sentiria?",
     "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria e o que pensaria sobre essa avaliação?",
     "Imagine um trabalho importante feito em equipe. O resultado final será muito visível para todos na organização. Se for um sucesso, o mérito é do grupo. Se houver uma falha, pode ser difícil apontar um único responsável. Como essa dinâmica de responsabilidade compartilhada afeta sua maneira de atuar?"
 ]
+mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
+mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 
+# --- Funções ---
 def save_transcript_to_github(chat_history):
     repo_name = "Entrevistador" 
     branch_name = "main"
@@ -101,21 +81,24 @@ def save_transcript_to_github(chat_history):
     except Exception as e:
         return f"Erro ao salvar no GitHub: {e}"
 
+# --- Lógica do Streamlit ---
 st.title("Chat Entrevistador de Pesquisa - UFF")
 
+# Inicializa o chat e o histórico de mensagens na sessão
 if "chat" not in st.session_state:
     st.session_state.chat = None
     st.session_state.messages = []
-    st.session_state.initial_message_sent = False
     
-if not st.session_state.initial_message_sent:
     st.session_state.messages.append({"role": "model", "content": mensagem_abertura})
-    st.session_state.initial_message_sent = True
 
+
+# Exibe o histórico da conversa
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+    if message["role"] != "system":
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
 
+# Processa a entrada do usuário
 if prompt := st.chat_input("Sua resposta...", key="chat_input"):
     st.session_state.messages.append({"role": "user", "content": prompt})
 
@@ -125,9 +108,10 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
     with st.chat_message("assistant"):
         with st.spinner("Pensando..."):
             if st.session_state.chat is None:
-                # O usuário acaba de responder à mensagem de abertura. Inicia o chat.
+                # O usuário acabou de responder à mensagem de abertura. Inicia o chat.
                 vinheta_escolhida = random.choice(vinhetas)
-                prompt_completo = orientacoes + "\n" + "Vinheta escolhida: " + vinheta_escolhida
+                prompt_completo = orientacoes_completas + "\n" + vinheta_escolhida
+                
                 st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo).start_chat()
                 
                 # A primeira mensagem da IA será a vinheta
