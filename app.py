@@ -10,12 +10,11 @@ import random
 import google.api_core.exceptions
 
 # --- Configuração do Gemini (CHAVE SEGURA AQUI) ---
-# Documentação: Configura a API do Google Generative AI com a chave secreta armazenada no Streamlit.
 genai.configure(api_key=st.secrets["gemini_api_key"])
 
-# --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA ---
-# Documentação: Esta variável contém todas as regras e a persona que a IA deve seguir.
-# É o "cérebro" do entrevistador, fornecido como instrução de sistema ao modelo.
+# --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA (PERSONA) ---
+# Documentação: Esta é a "personalidade" e o conjunto de regras da IA.
+# Será passado como uma instrução de sistema permanente.
 orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa. Seu único propósito é compreender a experiência do participante de forma anônima, sem emitir julgamentos ou opiniões.
@@ -60,112 +59,105 @@ vinhetas = [
     "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria e o que pensaria sobre essa avaliação?",
     "Imagine um trabalho importante feito em equipe. O resultado final será muito visível para todos na organização. Se for um sucesso, o mérito é do grupo. Se houver uma falha, pode ser difícil apontar um único responsável. Como essa dinâmica de responsabilidade compartilhada afeta sua maneira de atuar?"
 ]
-# Documentação: Mensagens padrão para iniciar e terminar a conversa.
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 
 # --- Funções ---
-# Documentação: Esta função é responsável por salvar o histórico da conversa (transcrição)
-# num ficheiro JSON no seu repositório do GitHub.
 def save_transcript_to_github(chat_history):
     repo_name = "Entrevistador" 
     branch_name = "main"
-
     try:
         g = Github(st.secrets["github_token"])
         user = g.get_user(st.secrets["github_user"])
         repo = user.get_repo(repo_name)
-
         unique_id = uuid.uuid4()
         file_path = f"transcricoes/entrevista_{unique_id}.json"
-        
         try:
             repo.get_contents("transcricoes")
         except:
             repo.create_file("transcricoes/.gitkeep", "Initial commit", "")
-
         json_content = json.dumps(chat_history, ensure_ascii=False, indent=4)
-        
         repo.create_file(file_path, f"Adicionando transcrição da entrevista {unique_id}", json_content, branch=branch_name)
-        
         return f"Entrevista salva no GitHub em {repo_name}/{file_path}"
-    
     except Exception as e:
         return f"Erro ao salvar no GitHub: {e}"
 
 st.title("Chat Entrevistador de Pesquisa - UFF")
 
-# Documentação: Inicializa o estado da sessão do Streamlit.
-# "chat" guardará o objeto da conversa com o Gemini.
-# "messages" é uma lista que guarda todo o histórico de diálogo.
 if "chat" not in st.session_state:
     st.session_state.chat = None
     st.session_state.messages = []
     st.session_state.messages.append({"role": "model", "content": mensagem_abertura})
 
-
-# Documentação: Este loop exibe todas as mensagens do histórico na interface do chat.
 for message in st.session_state.messages:
     if message["role"] != "system":
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-# Documentação: Esta secção processa a nova entrada do utilizador.
 if prompt := st.chat_input("Sua resposta...", key="chat_input"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-
     with st.chat_message("user"):
         st.write(prompt)
 
     with st.chat_message("assistant"):
         with st.spinner("Pensando..."):
-            # Documentação: Verifica se é a primeira mensagem do utilizador.
-            # Se "chat" ainda é None, significa que a conversa está a começar.
+            # <<< GRANDE MUDANÇA DE LÓGICA AQUI >>>
+            # Se o chat não foi iniciado, isso significa que o utilizador acabou de responder "sim" para começar.
             if st.session_state.chat is None:
-                vinheta_escolhida = random.choice(vinhetas)
-                prompt_completo = orientacoes_completas + "\n" + vinheta_escolhida
-                st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo).start_chat()
-            
-            # Documentação: Implementa uma lógica de retentativa para lidar com o erro de limite de taxa (ResourceExhausted).
-            response = None
-            max_retries = 3
-            delay_seconds = 2 # Começa com uma espera de 2 segundos
-            
-            for attempt in range(max_retries):
-                try:
-                    # Tenta enviar a mensagem para a API
-                    response = st.session_state.chat.send_message(prompt)
-                    # Se for bem-sucedido, sai do loop
-                    break 
-                except google.api_core.exceptions.ResourceExhausted:
-                    # Se o erro de limite de taxa ocorrer
-                    if attempt < max_retries - 1:
-                        # Se não for a última tentativa, avisa e espera
-                        st.warning(f"Limite de pedidos atingido. Tentando novamente em {delay_seconds} segundos...")
-                        time.sleep(delay_seconds)
-                        delay_seconds *= 2 # Dobra o tempo de espera para a próxima tentativa (backoff exponencial)
-                    else:
-                        # Se for a última tentativa, mostra o erro ao utilizador
-                        st.error("O serviço está sobrecarregado no momento. Por favor, tente novamente dentro de um minuto.")
-                        response = None # Garante que a resposta é nula
-                except Exception as e:
-                    # Captura outros erros inesperados
-                    st.error(f"Ocorreu um erro inesperado: {e}")
-                    response = None
-                    break
-            
-            # Continua apenas se uma resposta foi recebida com sucesso
-            if response:
-                st.session_state.messages.append({"role": "model", "content": response.text})
-                st.write(response.text)
+                # 1. Inicia o modelo com as instruções de sistema (a persona).
+                model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
+                st.session_state.chat = model.start_chat(history=[]) # Inicia com histórico vazio
 
-# Documentação: Lógica para o botão de encerramento da entrevista.
+                # 2. A aplicação escolhe e apresenta a vinheta como a primeira fala do modelo.
+                vinheta_escolhida = random.choice(vinhetas)
+                st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
+                st.write(vinheta_escolhida)
+                
+            # Se o chat já existe, a conversa continua normalmente.
+            else:
+                # O histórico que enviamos para a API não precisa incluir a mensagem de abertura.
+                # Apenas o diálogo relevante a partir da vinheta.
+                history_for_api = [msg for msg in st.session_state.messages if msg['content'] not in [mensagem_abertura]]
+
+                # Lógica de retentativa para lidar com erros de limite de taxa.
+                response = None
+                max_retries = 3
+                delay_seconds = 2
+                
+                for attempt in range(max_retries):
+                    try:
+                        # Envia o histórico relevante e a nova mensagem para a API
+                        st.session_state.chat.history = [
+                            {'role': 'user' if msg['role'] == 'user' else 'model', 'parts': [msg['content']]}
+                            for msg in history_for_api
+                        ]
+                        response = st.session_state.chat.send_message(prompt)
+                        break 
+                    except google.api_core.exceptions.ResourceExhausted:
+                        if attempt < max_retries - 1:
+                            st.warning(f"Limite de pedidos atingido. Tentando novamente em {delay_seconds} segundos...")
+                            time.sleep(delay_seconds)
+                            delay_seconds *= 2
+                        else:
+                            st.error("O serviço está sobrecarregado no momento. Por favor, tente novamente dentro de um minuto.")
+                            response = None
+                    except Exception as e:
+                        st.error(f"Ocorreu um erro inesperado: {e}")
+                        response = None
+                        break
+                
+                if response:
+                    # Adiciona a resposta do modelo ao histórico para ser exibida.
+                    response_text = response.text
+                    st.session_state.messages.append({"role": "model", "content": response_text})
+                    st.write(response_text)
+
+# Lógica para o botão de encerramento da entrevista.
 if st.button("Encerrar Entrevista"):
     with st.spinner("Salvando e encerrando..."):
-        # Adiciona a mensagem de encerramento ao histórico antes de salvar
         st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
         save_transcript_to_github(st.session_state.messages)
-        st.write(mensagem_encerramento) # Exibe a mensagem de encerramento na tela
+        st.write(mensagem_encerramento)
     st.session_state.clear()
     time.sleep(2)
     st.rerun()
