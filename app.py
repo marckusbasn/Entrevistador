@@ -50,6 +50,7 @@ REGRA 11: APROFUNDAMENTO DINÂMICO E PRIORIZADO: Sua principal tarefa é explora
 REGRA 12: SIMPLIFICAR AS PERGUNTAS: Sempre que possível, formule perguntas curtas, diretas e focadas em um único conceito por vez. Evite frases longas ou complexas que possam confundir o participante.
 """
 
+# A mensagem de abertura e as vinhetas agora estão separadas
 vinhetas = [
     "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar e o que você sentiria?",
     "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria e o que pensaria sobre essa avaliação?",
@@ -85,6 +86,7 @@ def save_transcript_to_github(chat_history):
     except Exception as e:
         return f"Erro ao salvar no GitHub: {e}"
 
+# --- Lógica do Streamlit ---
 st.title("Chat Entrevistador de Pesquisa - UFF")
 
 # Inicializa o chat e o histórico de mensagens na sessão
@@ -92,6 +94,7 @@ if "chat" not in st.session_state:
     st.session_state.chat = None
     st.session_state.messages = []
     
+    # A primeira mensagem da IA é a mensagem de abertura
     st.session_state.messages.append({"role": "model", "content": mensagem_abertura})
 
 
@@ -103,6 +106,7 @@ for message in st.session_state.messages:
 
 # Processa a entrada do usuário
 if prompt := st.chat_input("Sua resposta...", key="chat_input"):
+    
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("user"):
@@ -111,7 +115,7 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
     with st.chat_message("assistant"):
         with st.spinner("Pensando..."):
             if st.session_state.chat is None:
-                # O usuário acabou de responder à mensagem de abertura. Inicia o chat.
+                # O usuário acaba de responder à mensagem de abertura. Inicia o chat.
                 vinheta_escolhida = random.choice(vinhetas)
                 prompt_completo = orientacoes_completas + "\n" + vinheta_escolhida
                 
@@ -123,16 +127,16 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
                 st.write(response.text)
                 
             else:
+                # O chat já foi iniciado, a conversa segue normalmente
                 response = st.session_state.chat.send_message(prompt)
                 st.session_state.messages.append({"role": "model", "content": response.text})
                 st.write(response.text)
 
 if st.button("Encerrar Entrevista"):
     with st.spinner("Salvando e encerrando..."):
-        # Adiciona a mensagem de encerramento ao histórico antes de salvar
         st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
         save_transcript_to_github(st.session_state.messages)
-        st.write(mensagem_encerramento) # Exibe a mensagem de encerramento na tela
+        st.write(mensagem_encerramento)
     st.session_state.clear()
     time.sleep(2)
     st.rerun()
