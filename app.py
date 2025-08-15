@@ -13,8 +13,6 @@ import google.api_core.exceptions
 genai.configure(api_key=st.secrets["gemini_api_key"])
 
 # --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA (PERSONA) ---
-# Documentação: Esta é a "personalidade" e o conjunto de regras da IA.
-# Será passado como uma instrução de sistema permanente.
 orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa. Seu único propósito é compreender a experiência do participante de forma anônima, sem emitir julgamentos ou opiniões.
@@ -60,6 +58,15 @@ vinhetas = [
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 
+# <<< NOVA FUNÇÃO-AJUDANTE AQUI >>>
+# Documentação: Esta função recebe o stream de objetos da API Gemini
+# e transforma-o num stream de texto simples que o Streamlit consegue entender.
+def stream_handler(stream):
+    for chunk in stream:
+        # A palavra-chave 'yield' transforma a função num gerador,
+        # que produz valores um de cada vez.
+        yield chunk.text
+
 def save_transcript_to_github(chat_history):
     repo_name = "Entrevistador" 
     branch_name = "main"
@@ -97,32 +104,26 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        # O spinner agora é removido, pois o streaming dá feedback imediato.
-        # with st.spinner("Pensando..."):
-            if st.session_state.chat is None:
-                model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
-                st.session_state.chat = model.start_chat(history=[])
-                vinheta_escolhida = random.choice(vinhetas)
-                st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
-                st.write(vinheta_escolhida)
-            else:
-                # <<< ALTERAÇÃO PARA STREAMING AQUI >>>
-                try:
-                    # 1. Adiciona stream=True para pedir a resposta em pedaços.
-                    response_stream = st.session_state.chat.send_message(prompt, stream=True)
-                    
-                    # 2. Usa st.write_stream para exibir os pedaços em tempo real.
-                    # A função já lida com o loop e a exibição.
-                    # Ela também retorna o texto completo no final.
-                    full_response_text = st.write_stream(response_stream)
-                    
-                    # 3. Adiciona a resposta completa ao histórico da sessão.
-                    st.session_state.messages.append({"role": "model", "content": full_response_text})
+        if st.session_state.chat is None:
+            model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
+            st.session_state.chat = model.start_chat(history=[])
+            vinheta_escolhida = random.choice(vinhetas)
+            st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
+            st.write(vinheta_escolhida)
+        else:
+            try:
+                response_stream = st.session_state.chat.send_message(prompt, stream=True)
+                
+                # <<< MUDANÇA NA CHAMADA AQUI >>>
+                # Agora, passamos o stream pela nossa função-ajudante antes de entregar ao Streamlit.
+                text_generator = stream_handler(response_stream)
+                full_response_text = st.write_stream(text_generator)
+                
+                st.session_state.messages.append({"role": "model", "content": full_response_text})
 
-                except Exception as e:
-                    st.error(f"Ocorreu um erro ao comunicar com a API: {e}")
+            except Exception as e:
+                st.error(f"Ocorreu um erro ao comunicar com a API: {e}")
 
-# Lógica para o botão de encerramento da entrevista.
 if st.button("Encerrar Entrevista"):
     with st.spinner("Salvando e encerrando..."):
         st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
