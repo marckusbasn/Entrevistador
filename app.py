@@ -60,7 +60,11 @@ mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas 
 
 def stream_handler(stream):
     for chunk in stream:
-        yield chunk.text
+        try:
+            yield chunk.text
+        except Exception:
+            # Lida com chunks vazios ou problemáticos no final do stream
+            continue
 
 def save_transcript_to_github(chat_history):
     repo_name = "Entrevistador" 
@@ -83,8 +87,9 @@ def save_transcript_to_github(chat_history):
 
 st.title("Chat Entrevistador de Pesquisa - UFF")
 
-if "chat" not in st.session_state:
-    st.session_state.chat = None
+# <<< MUDANÇA 1: Não guardamos mais o 'chat', mas sim o 'model' >>>
+if "model" not in st.session_state:
+    st.session_state.model = None
     st.session_state.messages = []
     st.session_state.messages.append({"role": "model", "content": mensagem_abertura})
 
@@ -99,31 +104,47 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        if st.session_state.chat is None:
-            model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
-            st.session_state.chat = model.start_chat(history=[])
+        # Se o modelo não foi inicializado, fazemo-lo agora.
+        if st.session_state.model is None:
+            # Inicializa o modelo com as instruções de sistema
+            st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
+            
+            # A aplicação escolhe e apresenta a vinheta
             vinheta_escolhida = random.choice(vinhetas)
             st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
-            st.write(vinheta_escolhida)
+            st.rerun() # Reroda o script para exibir a vinheta
+        
+        # A conversa continua
         else:
-            # <<< MELHORIA DE EXPERIÊNCIA DO UTILIZADOR AQUI >>>
-            # 1. Cria um espaço reservado na tela.
             placeholder = st.empty()
-            # 2. Mostra uma mensagem de "a pensar" imediatamente.
             placeholder.markdown("Digitando…")
             
             try:
-                response_stream = st.session_state.chat.send_message(prompt, stream=True)
+                # <<< MUDANÇA 2: Preparamos o histórico manualmente >>>
+                # Encontra o início da conversa real (a vinheta)
+                start_index = 0
+                for i, msg in enumerate(st.session_state.messages):
+                    if msg['content'] in vinhetas:
+                        start_index = i
+                        break
+                
+                # Seleciona apenas as mensagens relevantes
+                relevant_messages = st.session_state.messages[start_index:]
+
+                # Converte para o formato que a API espera
+                history_for_api = []
+                for msg in relevant_messages:
+                    role = 'model' if msg['role'] == 'model' else 'user'
+                    history_for_api.append({'role': role, 'parts': [msg['content']]})
+
+                # <<< MUDANÇA 3: Usamos model.generate_content em vez de chat.send_message >>>
+                response_stream = st.session_state.model.generate_content(history_for_api, stream=True)
                 
                 text_generator = stream_handler(response_stream)
-                
-                # 3. Manda o stream para o espaço reservado, que irá substituir o "Digitando..."
                 full_response_text = placeholder.write_stream(text_generator)
-                
                 st.session_state.messages.append({"role": "model", "content": full_response_text})
 
             except Exception as e:
-                # Se der erro, mostra o erro no mesmo placeholder.
                 placeholder.error(f"Ocorreu um erro ao comunicar com a API: {e}")
 
 if st.button("Encerrar Entrevista"):
