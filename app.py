@@ -29,7 +29,7 @@ Seu objetivo é conduzir uma entrevista qualitativa breve para compreender como 
 
 # 3. CONTEXTO DA PESQUISA (Seu Conhecimento Interno - NÃO REVELE AO PARTICIPANTE)
 Sua análise se baseia nos seguintes conceitos-chave:
-Expectativa do Indivíduo: Investigar as percepções sobre ter que se justificar (Answerability), a possibilidade de recompensas/sanções (Consequencialidade), a ligação entre a ação e o indivíduo (Atribuibilidade) e a sensação de ser observado (Observabilidade).
+Expectativa do Indivíduo: Investigar as percepções sobre ter que se justificar (Answerability), a possibilidade de recompensas/sanções (Consequencialidade), a ligação entre a ação e o indivíduíduo (Atribuibilidade) e a sensação de ser observado (Observabilidade).
 Percepção sobre o Fórum: Entender como o servidor percebe a autoridade (Legitimidade) e o conhecimento técnico (Competência) de quem o avalia.
 
 # 4. REGRAS DE COMPORTAMENTO E APROFUNDAMENTO (SUAS DIRETRIZES PRINCIPAIS)
@@ -41,12 +41,17 @@ REGRA DE MÁXIMA PRIORIDADE 2 (PEDIDO DE ESCLARECIMENTO): Se o participante pedi
 
 REGRA DE MÁXIMA PRIORIDADE 3 (NUNCA QUEBRE A PERSONA): A sua única função é ser o entrevistador. JAMAIS explique como a resposta de um participante se conecta à teoria da pesquisa. Nunca mencione termos como "dimensão de competência", "análise qualitativa" ou "felt accountability". Use o seu conhecimento interno APENAS para decidir qual a melhor pergunta a fazer em seguida. O seu conhecimento teórico é secreto e nunca deve ser revelado.
 
-REGRA 9: EVITAR PERGUNTAS DUPLAS: Se a sua pergunta tiver mais de uma parte (ex: "Como você reagiria e o que pensaria?"), reformule-a para focar em uma única questão por vez.
+REGRA 1: PERGUNTAS ABERTAS E NEUTRAS: Use "Como...?", "Por que...?", "O que você sentiu com isso?".
+
+REGRA 2: ESCUTA ATIVA E APROFUNDAMENTO ORGÂNICO: Seu principal objetivo é explorar a fundo a resposta do participante. Não interrompa um raciocínio para mudar de assunto.
+
+REGRA 2.1 (APROFUNDAMENTO DE EMOÇÕES): Se o participante usar palavras de forte carga emocional (ex: "raiva", "frustração", "medo", "felicidade", "alívio"), a sua prioridade máxima é explorar essa emoção. NUNCA julgue a resposta como "incompleta" ou "insuficiente". Em vez disso, valide o sentimento com "Entendo" e faça uma pergunta aberta para explorar a sua origem. Por exemplo, se a resposta for "Ficaria com raiva", pergunte "Entendo. O que exatamente nessa situação lhe causaria raiva?".
 
 (O restante das regras continua o mesmo)
 """
 
-# <<< ALTERAÇÃO AQUI: Vinhetas corrigidas para terem apenas uma pergunta >>>
+# (O restante do código, incluindo vinhetas e a lógica da aplicação, permanece o mesmo. 
+# O código completo está abaixo para garantir que nada falte.)
 vinhetas = [
     "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar?",
     "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria a essa situação?",
@@ -55,12 +60,9 @@ vinhetas = [
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 
-# ==============================================================================
-# O RESTANTE DO CÓDIGO PERMANECE EXATAMENTE O MESMO
-# O código completo e funcional está abaixo para copiar e colar
-# ==============================================================================
 
 def pagina_configuracao():
+    # Código completo da página de configuração
     st.title("⚙️ Painel de Controlo do Pesquisador")
     st.write("Use esta ferramenta para criar ou atualizar a 'memória' do seu chatbot. Faça o upload do seu projeto de pesquisa em formato .txt e clique no botão para salvar a memória no GitHub.")
     st.warning("Esta página só é visível para si através do link especial com `?admin=true`.")
