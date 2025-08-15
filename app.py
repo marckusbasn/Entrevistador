@@ -84,12 +84,12 @@ def save_transcript_to_github(chat_history):
     except Exception as e:
         return f"Erro ao salvar no GitHub: {e}"
 
-# <<< MUDANÇA 2: Alteração do título da aplicação >>>
 st.title("felt accountability no setor público - Entrevista")
 
 if "model" not in st.session_state:
     st.session_state.model = None
     st.session_state.messages = []
+    st.session_state.interview_over = False # <<< NOVO: Flag para controlar o estado da entrevista
     st.session_state.messages.append({"role": "model", "content": mensagem_abertura})
 
 for message in st.session_state.messages:
@@ -97,17 +97,32 @@ for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-if prompt := st.chat_input("Sua resposta...", key="chat_input"):
+# Desativa o input se a entrevista tiver terminado
+if prompt := st.chat_input("Sua resposta...", key="chat_input", disabled=st.session_state.interview_over):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
     with st.chat_message("assistant"):
+        # Se o modelo não foi inicializado, este é o primeiro input do utilizador.
         if st.session_state.model is None:
-            st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
-            vinheta_escolhida = random.choice(vinhetas)
-            st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
-            st.rerun() 
+            # <<< NOVA LÓGICA DE VERIFICAÇÃO DE CONSENTIMENTO >>>
+            negative_responses = ["não", "nao", "não quero", "nao quero", "não, obrigado", "nao, obrigado"]
+            # Verifica se a primeira resposta é uma recusa
+            if prompt.lower().strip() in negative_responses:
+                # Se for, encerra a entrevista e bloqueia o input
+                st.write(mensagem_encerramento)
+                st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
+                st.session_state.interview_over = True
+                st.rerun() # Reroda para desativar o campo de input
+            else:
+                # Se não for uma recusa, assume consentimento e inicia a entrevista
+                st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
+                vinheta_escolhida = random.choice(vinhetas)
+                st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
+                st.rerun()
+        
+        # Se o modelo já existe, a conversa continua normalmente
         else:
             placeholder = st.empty()
             placeholder.markdown("Digitando…")
@@ -140,6 +155,6 @@ if st.button("Encerrar Entrevista"):
         st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
         save_transcript_to_github(st.session_state.messages)
         st.write(mensagem_encerramento)
-    st.session_state.clear()
-    time.sleep(2)
+        st.session_state.interview_over = True
+    time.sleep(1) # Pequena pausa para o utilizador ler
     st.rerun()
