@@ -7,13 +7,15 @@ import time
 import uuid
 from github import Github
 import random
+import google.api_core.exceptions
 
 # --- Configuração do Gemini (CHAVE SEGURA AQUI) ---
+# Documentação: Configura a API do Google Generative AI com a chave secreta armazenada no Streamlit.
 genai.configure(api_key=st.secrets["gemini_api_key"])
 
 # --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA ---
 # Documentação: Esta variável contém todas as regras e a persona que a IA deve seguir.
-# É o "cérebro" do entrevistador.
+# É o "cérebro" do entrevistador, fornecido como instrução de sistema ao modelo.
 orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa. Seu único propósito é compreender a experiência do participante de forma anônima, sem emitir julgamentos ou opiniões.
@@ -99,7 +101,6 @@ st.title("Chat Entrevistador de Pesquisa - UFF")
 if "chat" not in st.session_state:
     st.session_state.chat = None
     st.session_state.messages = []
-    
     st.session_state.messages.append({"role": "model", "content": mensagem_abertura})
 
 
@@ -121,26 +122,40 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input"):
             # Documentação: Verifica se é a primeira mensagem do utilizador.
             # Se "chat" ainda é None, significa que a conversa está a começar.
             if st.session_state.chat is None:
-                # O usuário acabou de responder à mensagem de abertura. Inicia o chat.
                 vinheta_escolhida = random.choice(vinhetas)
-                
-                # <<< CORREÇÃO AQUI >>>
-                # Juntamos as instruções completas com a vinheta para dar o contexto inicial à IA.
-                # O nome da variável foi corrigido de 'orientacoes' para 'orientacoes_completas'.
                 prompt_completo = orientacoes_completas + "\n" + vinheta_escolhida
-                
-                # Inicia o modelo generativo com as instruções do sistema (prompt_completo)
                 st.session_state.chat = genai.GenerativeModel('gemini-1.5-flash', system_instruction=prompt_completo).start_chat()
-                
-                # Envia a primeira resposta do utilizador para a IA.
-                response = st.session_state.chat.send_message(prompt)
-                
-                st.session_state.messages.append({"role": "model", "content": response.text})
-                st.write(response.text)
-                
-            else:
-                # Documentação: Se o chat já existe, apenas envia a nova mensagem do utilizador.
-                response = st.session_state.chat.send_message(prompt)
+            
+            # Documentação: Implementa uma lógica de retentativa para lidar com o erro de limite de taxa (ResourceExhausted).
+            response = None
+            max_retries = 3
+            delay_seconds = 2 # Começa com uma espera de 2 segundos
+            
+            for attempt in range(max_retries):
+                try:
+                    # Tenta enviar a mensagem para a API
+                    response = st.session_state.chat.send_message(prompt)
+                    # Se for bem-sucedido, sai do loop
+                    break 
+                except google.api_core.exceptions.ResourceExhausted:
+                    # Se o erro de limite de taxa ocorrer
+                    if attempt < max_retries - 1:
+                        # Se não for a última tentativa, avisa e espera
+                        st.warning(f"Limite de pedidos atingido. Tentando novamente em {delay_seconds} segundos...")
+                        time.sleep(delay_seconds)
+                        delay_seconds *= 2 # Dobra o tempo de espera para a próxima tentativa (backoff exponencial)
+                    else:
+                        # Se for a última tentativa, mostra o erro ao utilizador
+                        st.error("O serviço está sobrecarregado no momento. Por favor, tente novamente dentro de um minuto.")
+                        response = None # Garante que a resposta é nula
+                except Exception as e:
+                    # Captura outros erros inesperados
+                    st.error(f"Ocorreu um erro inesperado: {e}")
+                    response = None
+                    break
+            
+            # Continua apenas se uma resposta foi recebida com sucesso
+            if response:
                 st.session_state.messages.append({"role": "model", "content": response.text})
                 st.write(response.text)
 
