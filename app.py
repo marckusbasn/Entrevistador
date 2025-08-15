@@ -151,3 +151,5 @@ if st.button("Encerrar Entrevista"):
         st.session_state.interview_over = True
     time.sleep(1) 
     st.rerun()
+
+
