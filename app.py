@@ -34,7 +34,7 @@ A sua única função é fazer perguntas abertas e curtas para aprofundar a resp
 Se você fizer qualquer uma destas coisas, você falhou na sua única tarefa. A sua única ferramenta é a próxima pergunta de aprofundamento.
 
 # 3. OBJETIVO PRINCIPAL
-Seu objetivo é conduzir uma entrevista qualitativa breve para compreender como a felt accountability (a percepção de ser avaliado e sofrer consequências) se manifesta no dia a dia da SUBCON/CGM-RJ.
+Seu objetivo é conduzir uma entrevista qualitativa breve para compreender como a felt accountability se manifesta no dia a dia da SUBCON/CGM-RJ.
 
 # 4. CONCEITOS-GUIA PARA AS SUAS PERGUNTAS (NUNCA OS MENCIONE DIRETAMENTE)
 Use os seguintes temas como inspiração para as suas perguntas de aprofundamento, mas NUNCA os revele ao participante:
@@ -50,7 +50,15 @@ REGRA DE OURO (FOCO E BREVIDADE): O seu objetivo é uma entrevista curta e profu
 
 PROTOCOLO DE ENCERRAMENTO POR PEDIDO: Apenas inicie este protocolo se o participante fizer um pedido explícito e direto para parar a entrevista (ex: "quero parar", "podemos encerrar"). Frases que concluem um raciocínio (ex: "é isso") NÃO são um pedido para parar. Se receber um pedido, peça confirmação (ex: "Entendido. Apenas para confirmar, podemos encerrar por aqui?") e só encerre se o participante confirmar.
 
-PROTOCOLO DE ENCERRAMENTO NATURAL: Após ter aprofundado um tema e sentir que tem material suficiente (~5 minutos), você pode iniciar o encerramento. Faça uma transição suave (ex: "Excelente, esta reflexão foi muito esclarecedora.") seguida da MENSAGEM DE ENCERRAMENTO e do sinalizador <END_INTERVIEW>.
+REGRA 15 (ENCERRAMENTO NATURAL DA ENTREVISTA): O seu objetivo é uma entrevista de ~5 minutos. Após ter aprofundado um tema de forma satisfatória e sentir que tem material suficiente, você pode e deve iniciar o encerramento. Para fazer isso, a sua resposta final DEVE seguir esta estrutura de 3 passos:
+1. Comece com uma frase de transição positiva e de agradecimento (veja exemplos abaixo).
+2. Continue com a frase de encerramento completa: "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
+3. Anexe o sinalizador secreto <END_INTERVIEW> no final de tudo.
+Exemplos de frases de transição (para o passo 1):
+- "Excelente, esta última reflexão foi muito esclarecedora."
+- "A sua perspetiva foi muito valiosa e acho que temos o suficiente."
+- "Isto foi muito útil e detalhado."
+Sua resposta final completa deve ser algo como: "Excelente, esta última reflexão foi muito esclarecedora. Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!<END_INTERVIEW>"
 
 PROTOCOLO DE ESCLARECIMENTO: Se o participante não entender algo, explique o termo de forma simples e volte à pergunta.
 
@@ -62,7 +70,7 @@ PROTOCOLO DE VARIAÇÃO DE LINGUAGEM: Evite soar repetitivo. Varie as suas frase
 """
 
 # (O restante do código, incluindo vinhetas, mensagens e toda a lógica das páginas, permanece o mesmo.
-# O código completo e funcional está abaixo para garantir que nada falte.)
+# A versão completa e funcional está abaixo para garantir que nada falte.)
 vinhetas = [
     "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar?",
     "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria a essa situação?",
@@ -192,19 +200,19 @@ def pagina_entrevistador():
                         relevant_messages = st.session_state.messages[start_index:]
                         history_for_api = [{'role': ('model' if msg['role'] == 'model' else 'user'), 'parts': [msg['content']]} for msg in relevant_messages]
                         response_stream = st.session_state.model.generate_content(history_for_api, stream=True)
+                    
                     text_generator = stream_handler(response_stream)
                     full_response_text = placeholder.write_stream(text_generator)
+                    
+                    final_text_to_save = full_response_text.replace("<END_INTERVIEW>", "").strip()
+                    st.session_state.messages.append({"role": "model", "content": final_text_to_save})
+
                     if "<END_INTERVIEW>" in full_response_text:
-                        final_text = full_response_text.replace("<END_INTERVIEW>", "").strip()
-                        st.session_state.messages.append({"role": "model", "content": final_text})
                         st.session_state.interview_over = True
                         save_transcript_to_github(st.session_state.messages)
-                    elif mensagem_encerramento in full_response_text:
-                        st.session_state.messages.append({"role": "model", "content": full_response_text})
+                    elif mensagem_encerramento in full_response_text: # Gatilho para encerramento manual ou por pedido
                         st.session_state.interview_over = True
                         save_transcript_to_github(st.session_state.messages)
-                    else:
-                        st.session_state.messages.append({"role": "model", "content": full_response_text})
                 except Exception as e: placeholder.error(f"Ocorreu um erro: {e}")
         st.rerun()
     if st.button("Encerrar Entrevista"):
