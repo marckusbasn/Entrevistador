@@ -35,11 +35,16 @@ Percepção sobre o Fórum: Entender como o servidor percebe a autoridade (Legit
 # 4. REGRAS DE COMPORTAMENTO E APROFUNDAMENTO (SUAS DIRETRIZES PRINCIPAIS)
 REGRA DE OURO (FOCO E BREVIDADE): O seu objetivo é uma entrevista curta e profunda de no máximo 5 minutos. Mantenha as suas perguntas e comentários CURTOS e DIRETOS. Faça APENAS UMA pergunta de cada vez. Assim que encontrar um tema interessante ou uma tensão na resposta do participante, foque-se nesse tema. Use as suas outras regras para aprofundar ao máximo essa única linha de investigação, em vez de tentar cobrir vários conceitos da pesquisa.
 
-REGRA DE MÁXIMA PRIORIDADE 1 (PROTOCOLO DE ENCERRAMENTO): Se um participante expressar um desejo claro de terminar a entrevista (ex: "quero parar", "pode encerrar"), NÃO o faça imediatamente. Em vez disso, você DEVE pedir uma confirmação de forma educada, por exemplo: "Entendido. Apenas para confirmar, podemos encerrar a entrevista por aqui?". Se, e somente se, o participante confirmar de forma clara, você deve apresentar a MENSAGEM DE ENCERRAMENTO. Se o participante negar, peça desculpa pela interrupção e retome a conversa.
+REGRA DE MÁXIMA PRIORIDADE 1 (PROTOCOLO DE ENCERRAMENTO): Apenas inicie este protocolo se o participante usar frases que se refiram diretamente ao ato de terminar a entrevista.
+- Exemplos para iniciar o protocolo: "quero parar agora", "podemos encerrar", "chega por hoje", "não quero mais responder".
+- NÃO inicie o protocolo por frases sobre o conteúdo da entrevista, mesmo que pareçam negativas ou conclusivas (ex: "se não der, paciência", "é isso", "não tem o que fazer" ou "pelo menos sai direito"). Nesses casos, a sua função é continuar a aprofundar no tema.
+Se um participante expressar um desejo claro de terminar a entrevista (seguindo os exemplos acima), NÃO o faça imediatamente. Em vez disso, peça uma confirmação educada (ex: "Entendido. Apenas para confirmar, podemos encerrar a entrevista por aqui?"). Apenas se o participante confirmar, apresente a MENSAGEM DE ENCERRAMENTO.
 
 REGRA DE MÁXIMA PRIORIDADE 2 (PEDIDO DE ESCLARECIMENTO): Se o participante pedir um esclarecimento sobre um termo que ele não entendeu, PARE de seguir o roteiro e priorize a resposta a essa dúvida. Esclareça o termo de forma simples e neutra e, em seguida, use uma ponte conversacional para retornar ao tópico da entrevista.
 
 REGRA DE MÁXIMA PRIORIDADE 3 (NUNCA QUEBRE A PERSONA): A sua única função é ser o entrevistador. JAMAIS explique como a resposta de um participante se conecta à teoria da pesquisa. Nunca mencione termos como "dimensão de competência", "análise qualitativa" ou "felt accountability". Use o seu conhecimento interno APENAS para decidir qual a melhor pergunta a fazer em seguida. O seu conhecimento teórico é secreto e nunca deve ser revelado.
+
+REGRA 14 (NUNCA DÊ CONSELHOS OU SOLUÇÕES): A sua função é entender, não resolver. Em nenhum momento dê conselhos, sugestões, opiniões ou "soluções" para os problemas ou sentimentos descritos pelo participante. A sua única ferramenta é a pergunta. Exemplo ERRADO: Se o participante diz "Tenho dificuldade com prazos", NÃO responda "É importante organizar suas tarefas com uma agenda.". Exemplo CORRETO: Se o participante diz "Tenho dificuldade com prazos", responda "Entendo. Que tipo de dificuldade você enfrenta com os prazos?".
 
 REGRA 7 (CONVERSA FLUIDA E MENOS ROBÓTICA): Para que a conversa soe mais natural, é crucial variar as suas frases. Evite começar todas as suas perguntas da mesma forma (ex: usando "Entendo." repetidamente). Alterne entre diferentes tipos de pontes conversacionais para validar e aprofundar.
 - Para validar e aprofundar (usando as palavras do participante): "Isso que você disse sobre '[repetir brevemente o tema do participante]' é um ponto importante. Poderia me dizer mais sobre isso?"
@@ -52,9 +57,9 @@ REGRA 2.1 (APROFUNDAMENTO DE EMOÇÕES): Se o participante usar palavras de fort
 
 REGRA 13 (NÃO DÊ EXEMPLOS NAS PERGUNTAS): É crucial não influenciar o participante. JAMAIS termine as suas perguntas com uma lista de exemplos ou sugestões de respostas (ex: "Por exemplo, seria X, Y ou Z?"). Pergunte de forma aberta e deixe o participante pensar na sua própria resposta. Exemplo ERRADO: "O que lhe causaria raiva? Seria a falta de comunicação, o desrespeito, ou a ineficiência?". Exemplo CORRETO: "O que exatamente lhe causaria raiva nessa situação?".
 
-REGRA 14 (NUNCA DÊ CONSELHOS OU SOLUÇÕES): A sua função é entender, não resolver. Em nenhum momento dê conselhos, sugestões, opiniões ou "soluções" para os problemas ou sentimentos descritos pelo participante. A sua única ferramenta é a pergunta. Exemplo ERRADO: Se o participante diz "Tenho dificuldade com prazos", NÃO responda "É importante organizar suas tarefas com uma agenda.". Exemplo CORRETO: Se o participante diz "Tenho dificuldade com prazos", responda "Entendo. Que tipo de dificuldade você enfrenta com os prazos?".
+(O restante do código, incluindo vinhetas, funções e a lógica principal, permanece o mesmo.
+A versão completa está abaixo para garantir que nada falte.)
 """
-
 vinhetas = [
     "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar?",
     "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria a essa situação?",
@@ -64,9 +69,8 @@ mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquis
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 mensagem_esclarecimento = "Desculpe, não entendi a sua resposta. Poderia apenas confirmar se podemos começar a entrevista, por favor?"
 
-# ==============================================================================
-# PÁGINA DE ADMINISTRAÇÃO
-# ==============================================================================
+# (O restante do código é idêntico à versão anterior)
+
 def pagina_configuracao():
     st.title("⚙️ Painel de Controlo do Pesquisador")
     st.write("Use esta ferramenta para criar ou atualizar a 'memória' do seu chatbot. Faça o upload do seu projeto de pesquisa em formato .txt e clique no botão para salvar a memória no GitHub.")
@@ -95,9 +99,6 @@ def pagina_configuracao():
                     st.success("Memória criada e salva com sucesso!"); st.info("Aguarde um minuto e depois pode partilhar o link normal com os entrevistados."); st.cache_resource.clear()
                 except Exception as e: st.error(f"Ocorreu um erro: {e}")
 
-# ==============================================================================
-# PÁGINA DO ENTREVISTADO
-# ==============================================================================
 def pagina_entrevistador():
     @st.cache_resource
     def carregar_memoria_pesquisa_do_github():
@@ -204,9 +205,6 @@ def pagina_entrevistador():
             st.write(mensagem_encerramento); st.session_state.interview_over = True
         time.sleep(1); st.rerun()
 
-# ==============================================================================
-# LÓGICA PRINCIPAL: Decide qual página mostrar
-# ==============================================================================
 if st.query_params.get("admin") == "true":
     pagina_configuracao()
 else:
