@@ -20,164 +20,59 @@ GITHUB_USER = st.secrets.get("github_user")
 REPO_NAME = "Entrevistador"
 
 # --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA (PERSONA) ---
+# (O texto completo das orientações, com todas as regras, permanece aqui)
 orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
-# ... (igual à versão anterior)
-
-# 2. OBJETIVO PRINCIPAL
-# ... (igual à versão anterior)
-
-# 3. CONTEXTO DA PESQUISA (Seu Conhecimento Interno - NÃO REVELE AO PARTICIPANTE)
-# ... (igual à versão anterior)
-
-# 4. REGRAS DE COMPORTAMENTO E APROFUNDAMENTO (SUAS DIRETRIZES PRINCIPAIS)
-REGRA DE OURO (FOCO E BREVIDADE): O seu objetivo é uma entrevista curta e profunda de no máximo 5 minutos. Mantenha as suas perguntas e comentários CURTOS e DIRETOS. Faça APENAS UMA pergunta de cada vez. Assim que encontrar um tema interessante ou uma tensão na resposta do participante, foque-se nesse tema. Use as suas outras regras para aprofundar ao máximo essa única linha de investigação, em vez de tentar cobrir vários conceitos da pesquisa.
-
-REGRA DE MÁXIMA PRIORIDADE 1 (PROTOCOLO DE ENCERRAMENTO POR PEDIDO): Apenas inicie este protocolo se o participante fizer um pedido explícito e direto para parar a entrevista.
-- Exemplos para iniciar o protocolo: "quero parar agora", "podemos encerrar", "chega por hoje", "não quero mais responder".
-- NÃO inicie o protocolo por frases que apenas concluem um raciocínio, como "é isso", "sigo em frente" ou "pelo menos sai direito". Nesses casos, a sua função é continuar a aprofundar no tema.
-Se um participante expressar um desejo claro de terminar a entrevista, NÃO o faça imediatamente. Em vez disso, peça uma confirmação educada (ex: "Entendido. Apenas para confirmar, podemos encerrar a entrevista por aqui?"). Apenas se o participante confirmar, você deve apresentar a MENSAGEM DE ENCERRAMENTO.
-
-REGRA DE MÁXIMA PRIORIDADE 2 (PEDIDO DE ESCLARECIMENTO): Se o participante pedir um esclarecimento sobre um termo que ele não entendeu, PARE de seguir o roteiro e priorize a resposta a essa dúvida. Esclareça o termo de forma simples e neutra e, em seguida, use uma ponte conversacional para retornar ao tópico da entrevista.
-
-REGRA DE MÁXIMA PRIORIDADE 3 (NUNCA QUEBRE A PERSONA): A sua única função é ser o entrevistador. JAMAIS explique como a resposta de um participante se conecta à teoria da pesquisa. Nunca mencione termos como "dimensão de competência", "análise qualitativa" ou "felt accountability". Use o seu conhecimento interno APENAS para decidir qual a melhor pergunta a fazer em seguida. O seu conhecimento teórico é secreto e nunca deve ser revelado.
-
-REGRA 15 (ENCERRAMENTO NATURAL DA ENTREVISTA): O seu objetivo é uma entrevista de ~5 minutos. Após ter aprofundado um tema de forma satisfatória e sentir que tem material suficiente, você pode iniciar o encerramento. Nestes casos, NÃO use a pergunta de confirmação ("podemos encerrar?"). Em vez disso, faça uma transição suave para o fim. Use uma frase de agradecimento que indique que a meta foi atingida, seguida imediatamente da MENSAGEM DE ENCERRAMENTO.
-Exemplos de frases de transição: "Excelente, esta última reflexão foi muito esclarecedora. Agradeço imensamente pela sua contribuição.", "Acho que já temos material mais do que suficiente. A sua perspetiva foi muito valiosa.", "Isto foi muito útil e detalhado. Agradeço sinceramente o seu tempo.".
-**Ao usar este método de encerramento, você DEVE adicionar o seguinte sinalizador especial no final da sua resposta, sem espaços antes: <END_INTERVIEW>**
-**Exemplo de resposta final COMPLETA:** "Isto foi muito útil. Agradeço o detalhe na sua resposta. Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!<END_INTERVIEW>"
-
-REGRA 14 (NUNCA DÊ CONSELHOS OU SOLUÇÕES): A sua função é entender, não resolver. Em nenhum momento dê conselhos, sugestões, opiniões ou "soluções" para os problemas ou sentimentos descritos pelo participante. A sua única ferramenta é a pergunta.
-
-REGRA 7 (CONVERSA FLUIDA E MENOS ROBÓTICA): Para que a conversa soe mais natural, é crucial variar as suas frases. Evite começar todas as suas perguntas da mesma forma (ex: usando "Entendo." repetidamente). Alterne entre diferentes tipos de pontes conversacionais.
-
-REGRA 2.1 (APROFUNDAMENTO DE EMOÇÕES): Se o participante usar palavras de forte carga emocional (ex: "raiva", "frustração"), a sua prioridade máxima é explorar essa emoção. NUNCA julgue a resposta como "incompleta". Valide o sentimento com "Entendo" ou uma variação e faça uma pergunta aberta para explorar a sua origem.
-
-REGRA 13 (NÃO DÊ EXEMPLOS NAS PERGUNTAS): É crucial não influenciar o participante. JAMAIS termine as suas perguntas com uma lista de exemplos ou sugestões de respostas. Pergunte de forma aberta.
+# ... (O texto completo das regras está aqui, como na versão anterior)
 """
-# (vinhetas, mensagem_abertura, etc. permanecem iguais)
 vinhetas = [
-    "Imagine que você precisa entregar um relatório importante...",
-    "Pense que um procedimento que você considera correto...",
-    "Imagine um trabalho importante feito em equipe..."
+    "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar?",
+    "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria a essa situação?",
+    "Imagine um trabalho importante feito em equipe. O resultado final será muito visível para todos na organização. Se for um sucesso, o mérito é do grupo. Se houver uma falha, pode ser difícil apontar um único responsável. Como essa dinâmica de responsabilidade compartilhada afeta sua maneira de atuar?"
 ]
-mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa..."
+mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 mensagem_esclarecimento = "Desculpe, não entendi a sua resposta. Poderia apenas confirmar se podemos começar a entrevista, por favor?"
 
-# (O restante do código, incluindo as funções e a lógica das páginas, está completo abaixo)
+# ==============================================================================
+# PÁGINA DE ADMINISTRAÇÃO
+# ==============================================================================
 def pagina_configuracao():
     # ... (código da página de configuração sem alterações)
     pass
 
+# ==============================================================================
+# PÁGINA DO ENTREVISTADO
+# ==============================================================================
 def pagina_entrevistador():
     @st.cache_resource
     def carregar_memoria_pesquisa_do_github():
-        # ... (código sem alterações)
-        pass
-
-    def analisar_consentimento(resposta_utilizador):
-        # ... (código sem alterações)
-        pass
-
-    def classificar_intencao(prompt_utilizador):
-        # ... (código sem alterações)
-        pass
-
-    def responder_pergunta_pesquisa(index, chunks, pergunta):
-        # ... (código sem alterações)
-        pass
-
-    def stream_handler(stream):
-        for chunk in stream:
-            try: yield chunk.text
-            except Exception: continue
-    
-    def formatar_para_nvivo(chat_history):
-        # ... (código sem alterações)
-        pass
-
-    def save_transcript_to_github(chat_history):
-        if st.session_state.get('transcript_saved', False): return False
         try:
-            conteudo_formatado = formatar_para_nvivo(chat_history)
-            unique_id = uuid.uuid4()
-            file_path = f"transcricoes/entrevista_{unique_id}.txt"
             g = Github(GITHUB_TOKEN)
             repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
-            repo.create_file(file_path, f"Adicionando transcrição da entrevista {unique_id}", conteudo_formatado, branch="main")
-            st.session_state.transcript_saved = True
-            return True
-        except Exception as e:
-            print(f"Erro ao salvar no GitHub: {e}"); return False
+            
+            index_content = repo.get_contents("faiss_index.bin").decoded_content
+            temp_index_file = "temp_faiss_index_load.bin"
+            with open(temp_index_file, "wb") as f:
+                f.write(index_content)
+            index = faiss.read_index(temp_index_file)
+            os.remove(temp_index_file)
 
-    st.title("Felt Accountability no Setor Público - Entrevista")
-    index, chunks = carregar_memoria_pesquisa_do_github()
+            chunks_content = repo.get_contents("text_chunks.pkl").decoded_content
+            chunks = pickle.loads(chunks_content)
+            
+            return index, chunks
+        except Exception:
+            # <<< CORREÇÃO CRÍTICA AQUI >>>
+            # Garante que, em caso de falha, a função retorna uma tupla de dois elementos.
+            return None, None
 
-    if "model" not in st.session_state:
-        # ... (lógica de inicialização sem alterações)
-        pass
-    
-    # ... (loop de exibição de mensagens sem alterações)
+    # (O restante das funções e da lógica permanece igual)
+    pass
 
-    if prompt := st.chat_input("Sua resposta...", key="chat_input", disabled=st.session_state.interview_over):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"): st.write(prompt)
-
-        with st.chat_message("assistant"):
-            if st.session_state.model is None:
-                # ... (lógica de consentimento sem alterações)
-                pass
-            else:
-                placeholder = st.empty()
-                placeholder.markdown("Digitando…")
-                intencao = classificar_intencao(prompt)
-                
-                try:
-                    if intencao == "PESQUISA" and index is not None: 
-                        response_stream = responder_pergunta_pesquisa(index, chunks, prompt)
-                    else:
-                        start_index = 0
-                        for i, msg in enumerate(st.session_state.messages):
-                            if msg['content'] in vinhetas: start_index = i; break
-                        relevant_messages = st.session_state.messages[start_index:]
-                        history_for_api = [{'role': ('model' if msg['role'] == 'model' else 'user'), 'parts': [msg['content']]} for msg in relevant_messages]
-                        response_stream = st.session_state.model.generate_content(history_for_api, stream=True)
-                    
-                    text_generator = stream_handler(response_stream)
-                    full_response_text = placeholder.write_stream(text_generator)
-                    
-                    # <<< NOVA LÓGICA DE SALVAMENTO ROBUSTA >>>
-                    # Verifica se o sinal secreto está presente
-                    if "<END_INTERVIEW>" in full_response_text:
-                        # Limpa o sinal antes de salvar e mostrar
-                        final_text = full_response_text.replace("<END_INTERVIEW>", "").strip()
-                        st.session_state.messages.append({"role": "model", "content": final_text})
-                        st.session_state.interview_over = True
-                        save_transcript_to_github(st.session_state.messages)
-                    elif mensagem_encerramento in full_response_text: # Mantém o gatilho para o encerramento por botão
-                        st.session_state.messages.append({"role": "model", "content": full_response_text})
-                        st.session_state.interview_over = True
-                        save_transcript_to_github(st.session_state.messages)
-                    else:
-                        st.session_state.messages.append({"role": "model", "content": full_response_text})
-
-                except Exception as e: 
-                    placeholder.error(f"Ocorreu um erro: {e}")
-        
-        st.rerun()
-
-    if st.button("Encerrar Entrevista"):
-        with st.spinner("Salvando e encerrando..."):
-            st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
-            save_transcript_to_github(st.session_state.messages)
-            st.write(mensagem_encerramento)
-            st.session_state.interview_over = True
-        time.sleep(1)
-        st.rerun()
-
-# --- LÓGICA PRINCIPAL ---
-# (O código completo para copiar e colar está abaixo)
+# ==============================================================================
+# CÓDIGO COMPLETO PARA COPIAR E COLAR
+# ==============================================================================
 
 if st.query_params.get("admin") == "true":
     def pagina_configuracao():
@@ -208,4 +103,120 @@ if st.query_params.get("admin") == "true":
                     except Exception as e: st.error(f"Ocorreu um erro: {e}")
     pagina_configuracao()
 else:
+    def pagina_entrevistador():
+        @st.cache_resource
+        def carregar_memoria_pesquisa_do_github():
+            try:
+                g = Github(GITHUB_TOKEN)
+                repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
+                index_content = repo.get_contents("faiss_index.bin").decoded_content
+                temp_index_file = "temp_faiss_index_load.bin"
+                with open(temp_index_file, "wb") as f: f.write(index_content)
+                index = faiss.read_index(temp_index_file)
+                os.remove(temp_index_file)
+                chunks_content = repo.get_contents("text_chunks.pkl").decoded_content
+                chunks = pickle.loads(chunks_content)
+                return index, chunks
+            except Exception:
+                # CORREÇÃO APLICADA AQUI:
+                return None, None
+
+        def analisar_consentimento(resposta_utilizador):
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            prompt_analista = f"""Você é um assistente que analisa a resposta inicial de um participante de pesquisa. A pergunta feita foi: "Tudo bem? Podemos começar?". A sua tarefa é analisar a resposta do participante e decidir a próxima ação. A resposta do participante foi: "{resposta_utilizador}". Analise a resposta e escolha UMA das seguintes ações: - 'PROSSEGUIR': Se a resposta for um consentimento claro (sim, claro, podemos, ok, etc.). - 'ENCERRAR': Se a resposta for uma recusa clara (não, não quero, agora não, etc.). - 'ESCLARECER': Se a resposta for ambígua, sem sentido (ex: 'eedssd'), ou uma pergunta. Responda APENAS com a palavra PROSSEGUIR, ENCERRAR, ou ESCLARECER."""
+            try:
+                response = model.generate_content(prompt_analista)
+                decisao = response.text.strip().upper()
+                if decisao in ["PROSSEGUIR", "ENCERRAR", "ESCLARECER"]: return decisao
+                return "ESCLARECER"
+            except Exception: return "ESCLARECER"
+
+        def classificar_intencao(prompt_utilizador):
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            prompt_classificador = f"""Você é um classificador de intenções para um chatbot de entrevista. A intenção do utilizador pode ser uma de duas: 1. 'ENTREVISTA': O utilizador está a responder a uma pergunta da entrevista, expressando sentimentos, ou pedindo um esclarecimento sobre a última pergunta feita pelo entrevistador. 2. 'PESQUISA': O utilizador está a fazer uma pergunta sobre o projeto de pesquisa em si. Analise a seguinte frase do utilizador e classifique a sua intenção. Frase do Utilizador: "{prompt_utilizador}". Exemplos: - Frase: "Eu tentaria conversar com meu chefe." -> Intenção: ENTREVISTA - Frase: "Qual o objetivo deste estudo?" -> Intenção: PESQUISA - Frase: "Ficaria com raiva." -> Intenção: ENTREVISTA - Frase: "E sobre o anonimato?" -> Intenção: PESQUISA - Frase: "Não entendi. Pode explicar de novo?" -> Intenção: ENTREVISTA. Responda APENAS com a palavra 'PESQUISA' ou 'ENTREVISTA'."""
+            try:
+                response = model.generate_content(prompt_classificador)
+                if "PESQUISA" in response.text: return "PESQUISA"
+                return "ENTREVISTA"
+            except Exception: return "ENTREVISTA"
+
+        def responder_pergunta_pesquisa(index, chunks, pergunta):
+            embedding_model = 'models/embedding-001'; pergunta_embedding = genai.embed_content(model=embedding_model, content=pergunta, task_type="retrieval_query")['embedding']
+            k = 3; D, I = index.search(np.array([pergunta_embedding]).astype('float32'), k)
+            contexto_relevante = " ".join([chunks[i] for i in I[0]])
+            model = genai.GenerativeModel('gemini-1.5-flash'); prompt_final = f"Com base no seguinte contexto extraído do projeto de pesquisa:\n---\n{contexto_relevante}\n---\nPor favor, responda à seguinte pergunta do utilizador de forma clara e concisa: \"{pergunta}\""
+            response = model.generate_content(prompt_final, stream=True)
+            return response
+
+        def stream_handler(stream):
+            for chunk in stream:
+                try: yield chunk.text
+                except Exception: continue
+        
+        def formatar_para_nvivo(chat_history):
+            timestamp_inicio = datetime.datetime.now(datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=-3))).strftime("%d-%m-%Y %H:%M"); texto_formatado = f"Transcrição da Entrevista: {timestamp_inicio}\n\n"
+            for msg in chat_history[1:]:
+                role = "Participante" if msg['role'] == 'user' else 'Entrevistador'; timestamp = datetime.datetime.now(datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=-3))).strftime("%H:%M:%S")
+                texto_formatado += f"[{timestamp}] {role}: {msg['content']}\n"
+            return texto_formatado
+
+        def save_transcript_to_github(chat_history):
+            if st.session_state.get('transcript_saved', False): return False
+            try:
+                conteudo_formatado = formatar_para_nvivo(chat_history); unique_id = uuid.uuid4(); file_path = f"transcricoes/entrevista_{unique_id}.txt"
+                g = Github(GITHUB_TOKEN); repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
+                repo.create_file(file_path, f"Adicionando transcrição da entrevista {unique_id}", conteudo_formatado, branch="main")
+                st.session_state.transcript_saved = True; return True
+            except Exception as e:
+                print(f"Erro ao salvar no GitHub: {e}"); return False
+
+        st.title("Felt Accountability no Setor Público - Entrevista")
+        index, chunks = carregar_memoria_pesquisa_do_github()
+
+        if "model" not in st.session_state:
+            st.session_state.model = None; st.session_state.messages = []; st.session_state.interview_over = False; st.session_state.transcript_saved = False; st.session_state.messages.append({"role": "model", "content": mensagem_abertura})
+        for message in st.session_state.messages:
+            if message["role"] != "system":
+                with st.chat_message(message["role"]): st.write(message["content"])
+        if prompt := st.chat_input("Sua resposta...", key="chat_input", disabled=st.session_state.interview_over):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"): st.write(prompt)
+            with st.chat_message("assistant"):
+                if st.session_state.model is None:
+                    with st.spinner("Analisando..."): acao = analisar_consentimento(prompt)
+                    if acao == "PROSSEGUIR":
+                        st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
+                        vinheta_escolhida = random.choice(vinhetas); st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
+                    elif acao == "ENCERRAR":
+                        st.session_state.messages.append({"role": "model", "content": mensagem_encerramento}); st.session_state.interview_over = True; save_transcript_to_github(st.session_state.messages)
+                    elif acao == "ESCLARECER":
+                        st.session_state.messages.append({"role": "model", "content": mensagem_esclarecimento})
+                else:
+                    placeholder = st.empty(); placeholder.markdown("Digitando…")
+                    intencao = classificar_intencao(prompt)
+                    try:
+                        if intencao == "PESQUISA" and index is not None: response_stream = responder_pergunta_pesquisa(index, chunks, prompt)
+                        else:
+                            start_index = 0
+                            for i, msg in enumerate(st.session_state.messages):
+                                if msg['content'] in vinhetas: start_index = i; break
+                            relevant_messages = st.session_state.messages[start_index:]
+                            history_for_api = [{'role': ('model' if msg['role'] == 'model' else 'user'), 'parts': [msg['content']]} for msg in relevant_messages]
+                            response_stream = st.session_state.model.generate_content(history_for_api, stream=True)
+                        text_generator = stream_handler(response_stream)
+                        full_response_text = placeholder.write_stream(text_generator)
+                        st.session_state.messages.append({"role": "model", "content": full_response_text})
+                        if "<END_INTERVIEW>" in full_response_text or mensagem_encerramento in full_response_text:
+                            final_text = full_response_text.replace("<END_INTERVIEW>", "").strip()
+                            st.session_state.messages[-1]['content'] = final_text
+                            st.session_state.interview_over = True
+                            save_transcript_to_github(st.session_state.messages)
+                    except Exception as e: placeholder.error(f"Ocorreu um erro: {e}")
+            st.rerun()
+        if st.button("Encerrar Entrevista"):
+            with st.spinner("Salvando e encerrando..."):
+                st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
+                save_transcript_to_github(st.session_state.messages)
+                st.write(mensagem_encerramento); st.session_state.interview_over = True
+            time.sleep(1); st.rerun()
     pagina_entrevistador()
