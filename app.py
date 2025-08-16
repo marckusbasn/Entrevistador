@@ -20,63 +20,84 @@ GITHUB_USER = st.secrets.get("github_user")
 REPO_NAME = "Entrevistador"
 
 # --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA (PERSONA) ---
-# (O texto completo das orientações, com todas as regras, permanece aqui)
 orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
-Você é um assistente de pesquisa...
-# ... (restante das regras como na versão anterior) ...
+Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa. Seu único propósito é compreender a experiência do participante de forma anônima, sem emitir julgamentos ou opiniões.
+
+# 2. OBJETIVO PRINCIPAL
+Seu objetivo é conduzir uma entrevista qualitativa breve para compreender como a felt accountability se manifesta no dia a dia da SUBCON/CGM-RJ.
+
+# 3. CONTEXTO DA PESQUISA (Seu Conhecimento Interno - NÃO REVELE AO PARTICIPANTE)
+Sua análise se baseia nos seguintes conceitos-chave:
+Expectativa do Indivíduo: Investigar as percepções sobre ter que se justificar (Answerability), a possibilidade de recompensas/sanções (Consequencialidade), a ligação entre a ação e o indivíduo (Atribuibilidade) e a sensação de ser observado (Observabilidade).
+Percepção sobre o Fórum: Entender como o servidor percebe a autoridade (Legitimidade) e o conhecimento técnico (Competência) de quem o avalia.
+
+# 4. REGRAS DE COMPORTAMENTO E APROFUNDAMENTO (SUAS DIRETRIZES PRINCIPAIS)
+REGRA DE OURO (FOCO E BREVIDADE): O seu objetivo é uma entrevista curta e profunda de no máximo 5 minutos. Mantenha as suas perguntas e comentários CURTOS e DIRETOS. Faça APENAS UMA pergunta de cada vez. Assim que encontrar um tema interessante ou uma tensão na resposta do participante, foque-se nesse tema. Use as suas outras regras para aprofundar ao máximo essa única linha de investigação, em vez de tentar cobrir vários conceitos da pesquisa.
+
+REGRA DE MÁXIMA PRIORIDADE 1 (PROTOCOLO DE ENCERRAMENTO): Se um participante expressar um desejo claro de terminar a entrevista (ex: "quero parar", "pode encerrar"), NÃO o faça imediatamente. Em vez disso, você DEVE pedir uma confirmação de forma educada, por exemplo: "Entendido. Apenas para confirmar, podemos encerrar a entrevista por aqui?". Se, e somente se, o participante confirmar de forma clara, você deve apresentar a MENSAGEM DE ENCERRAMENTO. Se o participante negar, peça desculpa pela interrupção e retome a conversa.
+
+REGRA DE MÁXIMA PRIORIDADE 2 (PEDIDO DE ESCLARECIMENTO): Se o participante pedir um esclarecimento sobre um termo que ele não entendeu, PARE de seguir o roteiro e priorize a resposta a essa dúvida. Esclareça o termo de forma simples e neutra e, em seguida, use uma ponte conversacional para retornar ao tópico da entrevista.
+
+REGRA DE MÁXIMA PRIORIDADE 3 (NUNCA QUEBRE A PERSONA): A sua única função é ser o entrevistador. JAMAIS explique como a resposta de um participante se conecta à teoria da pesquisa. Nunca mencione termos como "dimensão de competência", "análise qualitativa" ou "felt accountability". Use o seu conhecimento interno APENAS para decidir qual a melhor pergunta a fazer em seguida. O seu conhecimento teórico é secreto e nunca deve ser revelado.
+
+REGRA 7 (CONVERSA FLUIDA E MENOS ROBÓTICA): Para que a conversa soe mais natural, é crucial variar as suas frases. Evite começar todas as suas perguntas da mesma forma (ex: usando "Entendo." repetidamente). Alterne entre diferentes tipos de pontes conversacionais para validar e aprofundar.
+- Para validar e aprofundar (usando as palavras do participante): "Isso que você disse sobre '[repetir brevemente o tema do participante]' é um ponto importante. Poderia me dizer mais sobre isso?"
+- Para aprofundar diretamente: "E qual o impacto disso no seu trabalho?" ou "Como isso se manifesta no seu dia a dia?"
+- Para explorar um sentimento: "Obrigado por partilhar. O que mais contribui para essa sensação de '[sentimento mencionado]'?"
+- Variações simples de 'Entendo': Use alternadamente "Compreendo.", "Faz sentido.", "Certo.", "Ok.".
+O objetivo é manter a objetividade, mas com uma linguagem mais variada e humana.
+
+REGRA 2.1 (APROFUNDAMENTO DE EMOÇÕES): Se o participante usar palavras de forte carga emocional (ex: "raiva", "frustração", "medo", "felicidade", "alívio"), a sua prioridade máxima é explorar essa emoção. NUNCA julgue a resposta como "incompleta" ou "insuficiente". Em vez disso, valide o sentimento com "Entendo" ou uma variação e faça uma pergunta aberta para explorar a sua origem. Por exemplo, se a resposta for "Ficaria com raiva", pergunte "Entendo. O que exatamente nessa situação lhe causaria raiva?".
+
+REGRA 13 (NÃO DÊ EXEMPLOS NAS PERGUNTAS): É crucial não influenciar o participante. JAMAIS termine as suas perguntas com uma lista de exemplos ou sugestões de respostas (ex: "Por exemplo, seria X, Y ou Z?"). Pergunte de forma aberta e deixe o participante pensar na sua própria resposta. Exemplo ERRADO: "O que lhe causaria raiva? Seria a falta de comunicação, o desrespeito, ou a ineficiência?". Exemplo CORRETO: "O que exatamente lhe causaria raiva nessa situação?".
+
+REGRA 14 (NUNCA DÊ CONSELHOS OU SOLUÇÕES): A sua função é entender, não resolver. Em nenhum momento dê conselhos, sugestões, opiniões ou "soluções" para os problemas ou sentimentos descritos pelo participante. A sua única ferramenta é a pergunta. Exemplo ERRADO: Se o participante diz "Tenho dificuldade com prazos", NÃO responda "É importante organizar suas tarefas com uma agenda.". Exemplo CORRETO: Se o participante diz "Tenho dificuldade com prazos", responda "Entendo. Que tipo de dificuldade você enfrenta com os prazos?".
 """
+
 vinhetas = [
-    "Imagine que você precisa entregar um relatório importante...",
-    "Pense que um procedimento que você considera correto...",
-    "Imagine um trabalho importante feito em equipe..."
+    "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar?",
+    "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria a essa situação?",
+    "Imagine um trabalho importante feito em equipe. O resultado final será muito visível para todos na organização. Se for um sucesso, o mérito é do grupo. Se houver uma falha, pode ser difícil apontar um único responsável. Como essa dinâmica de responsabilidade compartilhada afeta sua maneira de atuar?"
 ]
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
 mensagem_esclarecimento = "Desculpe, não entendi a sua resposta. Poderia apenas confirmar se podemos começar a entrevista, por favor?"
 
 # ==============================================================================
-# FUNÇÕES PRINCIPAIS (INCLUINDO O NOVO ANALISTA DE CONSENTIMENTO)
+# PÁGINA DE ADMINISTRAÇÃO
 # ==============================================================================
-
-def analisar_consentimento(resposta_utilizador):
-    """
-    Usa a IA para analisar a primeira resposta do utilizador e decidir a próxima ação.
-    """
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    prompt_analista = f"""
-    Você é um assistente que analisa a resposta inicial de um participante de pesquisa. A pergunta feita foi: "Tudo bem? Podemos começar?".
-    A sua tarefa é analisar a resposta do participante e decidir a próxima ação.
-
-    A resposta do participante foi: "{resposta_utilizador}"
-
-    Analise a resposta e escolha UMA das seguintes ações:
-    - 'PROSSEGUIR': Se a resposta for um consentimento claro (sim, claro, podemos, ok, etc.).
-    - 'ENCERRAR': Se a resposta for uma recusa clara (não, não quero, agora não, etc.).
-    - 'ESCLARECER': Se a resposta for ambígua, sem sentido (ex: 'eedssd'), ou uma pergunta.
-
-    Responda APENAS com a palavra PROSSEGUIR, ENCERRAR, ou ESCLARECER.
-    """
-    try:
-        response = model.generate_content(prompt_analista)
-        decisao = response.text.strip().upper()
-        if decisao in ["PROSSEGUIR", "ENCERRAR", "ESCLARECER"]:
-            return decisao
-        return "ESCLARECER" # Padrão de segurança
-    except Exception:
-        return "ESCLARECER" # Padrão de segurança
-
-# (O restante das funções permanece o mesmo. O código completo está abaixo)
-
-# ==============================================================================
-# CÓDIGO COMPLETO PARA COPIAR E COLAR
-# ==============================================================================
-# (As funções e a lógica principal estão completas aqui)
-
 def pagina_configuracao():
-    # ... (código da página de configuração sem alterações)
-    pass
+    st.title("⚙️ Painel de Controlo do Pesquisador")
+    st.write("Use esta ferramenta para criar ou atualizar a 'memória' do seu chatbot. Faça o upload do seu projeto de pesquisa em formato .txt e clique no botão para salvar a memória no GitHub.")
+    st.warning("Esta página só é visível para si através do link especial com `?admin=true`.")
+    uploaded_file = st.file_uploader("Selecione o seu ficheiro `projeto.txt`", type="txt")
+    if uploaded_file is not None:
+        st.success(f"Ficheiro '{uploaded_file.name}' carregado com sucesso!")
+        if st.button("Criar e Salvar Memória no GitHub"):
+            with st.spinner("A processar o documento..."):
+                try:
+                    document_text = uploaded_file.getvalue().decode("utf-8"); text_chunks = [chunk for chunk in document_text.split('\n\n') if chunk.strip()]
+                    embedding_model = 'models/embedding-001'; embeddings = genai.embed_content(model=embedding_model, content=text_chunks, task_type="retrieval_document")
+                    embeddings_np = np.array(embeddings['embedding']).astype('float32'); d = embeddings_np.shape[1]; index = faiss.IndexFlatL2(d); index.add(embeddings_np)
+                    temp_index_file = "temp_faiss_index.bin"; faiss.write_index(index, temp_index_file)
+                    with open(temp_index_file, "rb") as f: index_bytes = f.read()
+                    os.remove(temp_index_file)
+                    g = Github(GITHUB_TOKEN); repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
+                    def upload_or_update_file(file_path, commit_message, content):
+                        try:
+                            contents = repo.get_contents(file_path)
+                            repo.update_file(contents.path, commit_message, content, contents.sha, branch="main"); st.write(f"Ficheiro '{file_path}' atualizado no GitHub.")
+                        except:
+                            repo.create_file(file_path, commit_message, content, branch="main"); st.write(f"Ficheiro '{file_path}' criado no GitHub.")
+                    upload_or_update_file("faiss_index.bin", "Atualizando índice FAISS", index_bytes)
+                    chunks_bytes = pickle.dumps(text_chunks); upload_or_update_file("text_chunks.pkl", "Atualizando pedaços de texto", chunks_bytes)
+                    st.success("Memória criada e salva com sucesso!"); st.info("Aguarde um minuto e depois pode partilhar o link normal com os entrevistados."); st.cache_resource.clear()
+                except Exception as e: st.error(f"Ocorreu um erro: {e}")
 
+# ==============================================================================
+# PÁGINA DO ENTREVISTADO
+# ==============================================================================
 def pagina_entrevistador():
     @st.cache_resource
     def carregar_memoria_pesquisa_do_github():
@@ -89,9 +110,19 @@ def pagina_entrevistador():
             return index, chunks
         except Exception: return None, None
 
+    def analisar_consentimento(resposta_utilizador):
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        prompt_analista = f"""Você é um assistente que analisa a resposta inicial de um participante de pesquisa. A pergunta feita foi: "Tudo bem? Podemos começar?". A sua tarefa é analisar a resposta do participante e decidir a próxima ação. A resposta do participante foi: "{resposta_utilizador}". Analise a resposta e escolha UMA das seguintes ações: - 'PROSSEGUIR': Se a resposta for um consentimento claro (sim, claro, podemos, ok, etc.). - 'ENCERRAR': Se a resposta for uma recusa clara (não, não quero, agora não, etc.). - 'ESCLARECER': Se a resposta for ambígua, sem sentido (ex: 'eedssd'), ou uma pergunta. Responda APENAS com a palavra PROSSEGUIR, ENCERRAR, ou ESCLARECER."""
+        try:
+            response = model.generate_content(prompt_analista)
+            decisao = response.text.strip().upper()
+            if decisao in ["PROSSEGUIR", "ENCERRAR", "ESCLARECER"]: return decisao
+            return "ESCLARECER"
+        except Exception: return "ESCLARECER"
+
     def classificar_intencao(prompt_utilizador):
         model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt_classificador = f"""Você é um classificador de intenções... (prompt completo como na versão anterior)"""
+        prompt_classificador = f"""Você é um classificador de intenções para um chatbot de entrevista. A intenção do utilizador pode ser uma de duas: 1. 'ENTREVISTA': O utilizador está a responder a uma pergunta da entrevista, expressando sentimentos, ou pedindo um esclarecimento sobre a última pergunta feita pelo entrevistador. 2. 'PESQUISA': O utilizador está a fazer uma pergunta sobre o projeto de pesquisa em si. Analise a seguinte frase do utilizador e classifique a sua intenção. Frase do Utilizador: "{prompt_utilizador}". Exemplos: - Frase: "Eu tentaria conversar com meu chefe." -> Intenção: ENTREVISTA - Frase: "Qual o objetivo deste estudo?" -> Intenção: PESQUISA - Frase: "Ficaria com raiva." -> Intenção: ENTREVISTA - Frase: "E sobre o anonimato?" -> Intenção: PESQUISA - Frase: "Não entendi. Pode explicar de novo?" -> Intenção: ENTREVISTA. Responda APENAS com a palavra 'PESQUISA' ou 'ENTREVISTA'."""
         try:
             response = model.generate_content(prompt_classificador)
             if "PESQUISA" in response.text: return "PESQUISA"
@@ -99,8 +130,12 @@ def pagina_entrevistador():
         except Exception: return "ENTREVISTA"
 
     def responder_pergunta_pesquisa(index, chunks, pergunta):
-        # ... (código sem alterações)
-        pass
+        embedding_model = 'models/embedding-001'; pergunta_embedding = genai.embed_content(model=embedding_model, content=pergunta, task_type="retrieval_query")['embedding']
+        k = 3; D, I = index.search(np.array([pergunta_embedding]).astype('float32'), k)
+        contexto_relevante = " ".join([chunks[i] for i in I[0]])
+        model = genai.GenerativeModel('gemini-1.5-flash'); prompt_final = f"Com base no seguinte contexto extraído do projeto de pesquisa:\n---\n{contexto_relevante}\n---\nPor favor, responda à seguinte pergunta do utilizador de forma clara e concisa: \"{pergunta}\""
+        response = model.generate_content(prompt_final, stream=True)
+        return response
 
     def stream_handler(stream):
         for chunk in stream:
@@ -108,77 +143,71 @@ def pagina_entrevistador():
             except Exception: continue
     
     def formatar_para_nvivo(chat_history):
-        # ... (código sem alterações)
-        pass
+        timestamp_inicio = datetime.datetime.now(datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=-3))).strftime("%d-%m-%Y %H:%M"); texto_formatado = f"Transcrição da Entrevista: {timestamp_inicio}\n\n"
+        for msg in chat_history[1:]:
+            role = "Participante" if msg['role'] == 'user' else 'Entrevistador'; timestamp = datetime.datetime.now(datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=-3))).strftime("%H:%M:%S")
+            texto_formatado += f"[{timestamp}] {role}: {msg['content']}\n"
+        return texto_formatado
 
     def save_transcript_to_github(chat_history):
-        # ... (código sem alterações)
-        pass
+        if st.session_state.get('transcript_saved', False): return False
+        try:
+            conteudo_formatado = formatar_para_nvivo(chat_history); unique_id = uuid.uuid4(); file_path = f"transcricoes/entrevista_{unique_id}.txt"
+            g = Github(GITHUB_TOKEN); repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
+            repo.create_file(file_path, f"Adicionando transcrição da entrevista {unique_id}", conteudo_formatado, branch="main")
+            st.session_state.transcript_saved = True; return True
+        except Exception as e:
+            print(f"Erro ao salvar no GitHub: {e}"); return False
 
-    st.title("Felt Accountability no Setor Público - Entrevista")
-    index, chunks = carregar_memoria_pesquisa_do_github()
-
+    st.title("Felt Accountability no Setor Público - Entrevista"); index, chunks = carregar_memoria_pesquisa_do_github()
     if "model" not in st.session_state:
         st.session_state.model = None; st.session_state.messages = []; st.session_state.interview_over = False; st.session_state.transcript_saved = False; st.session_state.messages.append({"role": "model", "content": mensagem_abertura})
-    
     for message in st.session_state.messages:
         if message["role"] != "system":
             with st.chat_message(message["role"]): st.write(message["content"])
-
     if prompt := st.chat_input("Sua resposta...", key="chat_input", disabled=st.session_state.interview_over):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"): st.write(prompt)
-
         with st.chat_message("assistant"):
-            # <<< LÓGICA DE INÍCIO TOTALMENTE REFEITA >>>
             if st.session_state.model is None:
-                with st.spinner("Analisando..."):
-                    acao = analisar_consentimento(prompt)
-
+                with st.spinner("Analisando..."): acao = analisar_consentimento(prompt)
                 if acao == "PROSSEGUIR":
                     st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
-                    vinheta_escolhida = random.choice(vinhetas)
-                    st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
-                
+                    vinheta_escolhida = random.choice(vinhetas); st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
                 elif acao == "ENCERRAR":
-                    st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
-                    st.session_state.interview_over = True
-                    save_transcript_to_github(st.session_state.messages)
-
+                    st.session_state.messages.append({"role": "model", "content": mensagem_encerramento}); st.session_state.interview_over = True; save_transcript_to_github(st.session_state.messages)
                 elif acao == "ESCLARECER":
                     st.session_state.messages.append({"role": "model", "content": mensagem_esclarecimento})
-            
-            # A lógica da entrevista em andamento permanece a mesma
             else:
                 placeholder = st.empty(); placeholder.markdown("Digitando…")
                 intencao = classificar_intencao(prompt)
                 try:
-                    if intencao == "PESQUISA" and index is not None: 
-                        response_stream = responder_pergunta_pesquisa(index, chunks, prompt)
+                    if intencao == "PESQUISA" and index is not None: response_stream = responder_pergunta_pesquisa(index, chunks, prompt)
                     else:
-                        # (lógica da entrevista sem alterações)
                         start_index = 0
                         for i, msg in enumerate(st.session_state.messages):
                             if msg['content'] in vinhetas: start_index = i; break
                         relevant_messages = st.session_state.messages[start_index:]
                         history_for_api = [{'role': ('model' if msg['role'] == 'model' else 'user'), 'parts': [msg['content']]} for msg in relevant_messages]
                         response_stream = st.session_state.model.generate_content(history_for_api, stream=True)
-                    
                     text_generator = stream_handler(response_stream)
                     full_response_text = placeholder.write_stream(text_generator)
                     st.session_state.messages.append({"role": "model", "content": full_response_text})
                     if mensagem_encerramento in full_response_text:
                         st.session_state.interview_over = True; save_transcript_to_github(st.session_state.messages)
                 except Exception as e: placeholder.error(f"Ocorreu um erro: {e}")
-        
         st.rerun()
-
     if st.button("Encerrar Entrevista"):
-        # ... (código sem alterações)
-        pass
+        with st.spinner("Salvando e encerrando..."):
+            st.session_state.messages.append({"role": "model", "content": mensagem_encerramento})
+            save_transcript_to_github(st.session_state.messages)
+            st.write(mensagem_encerramento); st.session_state.interview_over = True
+        time.sleep(1); st.rerun()
 
+# ==============================================================================
+# LÓGICA PRINCIPAL: Decide qual página mostrar
+# ==============================================================================
 if st.query_params.get("admin") == "true":
-    # Cole a definição completa da sua pagina_configuracao aqui
-    pass
+    pagina_configuracao()
 else:
     pagina_entrevistador()
