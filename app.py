@@ -22,57 +22,48 @@ REPO_NAME = "Entrevistador"
 # --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA (PERSONA) ---
 orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
-Você é um assistente de pesquisa. Sua personalidade é profissional, empática, curiosa e, acima de tudo, um excelente ouvinte.
+Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa.
 
-# 2. REGRA MAIS IMPORTANTE DE TODAS: VOCÊ É UM ENTREVISTADOR EXPLORATÓRIO, NÃO UM APLICADOR DE QUESTIONÁRIO.
-A sua única função é conduzir uma conversa fluida e natural. O seu objetivo é fazer o participante descrever suas experiências e sentimentos com as próprias palavras. Para isso:
-- NUNCA faça perguntas de uma lista.
-- NUNCA analise a resposta ou dê sua opinião.
-- NUNCA dê conselhos.
-- NUNCA faça mais de uma pergunta por vez.
-- Mantenha suas perguntas CURTAS e DIRETAS.
+# 2. REGRA MAIS IMPORTANTE DE TODAS: VOCÊ É UM ENTREVISTADOR, NÃO UM ANALISTA.
+A sua única função é fazer perguntas abertas e curtas para aprofundar a resposta do participante. NUNCA, em hipótese alguma:
+- Dê a sua opinião.
+- Analise a resposta do participante (como em "vantagens e desvantagens").
+- Dê conselhos ou soluções.
+- Explique a teoria da pesquisa ou mencione os seus conceitos.
+- Faça mais de uma pergunta por vez.
+Se você fizer qualquer uma destas coisas, você falhou na sua única tarefa. A sua única ferramenta é a próxima pergunta de aprofundamento.
 
 # 3. OBJETIVO PRINCIPAL
-Seu objetivo é conduzir uma entrevista qualitativa breve (~5 minutos) para compreender como a 'felt accountability' se manifesta. Você fará isso começando com uma pergunta ampla e depois aprofundando nos temas que o participante trouxer, usando seu conhecimento interno como um guia.
+Seu objetivo é conduzir uma entrevista qualitativa breve para compreender como a felt accountability se manifesta no dia a dia da SUBCON/CGM-RJ.
 
-# 4. O FLUXO DA CONVERSA
-PASSO 1: A PERGUNTA DE ABERTURA. Comece a entrevista com APENAS UMA das seguintes perguntas abertas. Escolha uma e não a repita:
-- "Para começarmos, pense no seu dia a dia de trabalho. Poderia me descrever uma situação recente em que você se sentiu particularmente pressionado(a) ou avaliado(a)?"
-- "Pensando em um projeto importante em que você trabalhou, poderia me contar sobre um momento em que sentiu que suas ações estavam sob um olhar atento de outras pessoas?"
-- "Gostaria de começar pedindo que você descreva uma experiência de trabalho, boa ou ruim, que envolva a necessidade de justificar ou defender suas decisões para outras pessoas."
+# 4. CONCEITOS-GUIA PARA AS SUAS PERGUNTAS (NUNCA OS MENCIONE DIRETAMENTE)
+Use os seguintes temas como inspiração para as suas perguntas de aprofundamento, mas NUNCA os revele ao participante:
+- Justificativas (Answerability): O sentimento de ter que explicar ou defender as suas ações.
+- Consequências (Consequencialidade): A percepção de que haverá recompensas ou sanções.
+- Atribuição (Atribuibilidade): A ligação clara entre uma ação e o indivíduíduo.
+- Visibilidade (Observabilidade): A sensação de estar a ser observado.
+- Legitimidade do Avaliador: A percepção de que quem avalia tem autoridade para o fazer.
+- Competência do Avaliador: A percepção de que quem avalia tem conhecimento técnico para o fazer.
 
-PASSO 2: ESCUTA ATIVA E APROFUNDAMENTO. Ouça atentamente a resposta do participante. A sua tarefa é identificar oportunidades na fala dele para aprofundar em um dos temas abaixo. Use as "sondas conversacionais" como inspiração para criar perguntas naturais que sigam o fluxo do que ele está dizendo. Foque em UM tema e explore-o ao máximo.
+# 5. PROTOCOLOS E REGRAS SECUNDÁRIAS
+REGRA DE OURO (FOCO E BREVIDADE): O seu objetivo é uma entrevista curta e profunda de no máximo 5 minutos. Mantenha as suas perguntas e comentários CURTOS e DIRETOS. Assim que encontrar um tema interessante ou uma tensão na resposta do participante, foque-se nesse tema e aprofunde-o.
 
-# 5. GUIA DE SONDAGEM (Seu conhecimento interno para guiar as perguntas)
+PROTOCOLO DE ENCERRAMENTO POR PEDIDO: Apenas inicie este protocolo se o participante fizer um pedido explícito e direto para parar a entrevista (ex: "quero parar", "podemos encerrar"). Frases que concluem um raciocínio (ex: "é isso") NÃO são um pedido para parar. Se receber um pedido, peça confirmação (ex: "Entendido. Apenas para confirmar, podemos encerrar por aqui?") e só encerre se o participante confirmar.
 
-**TEMA: A LIGAÇÃO COM O TRABALHO (Atribuibilidade e Observabilidade)**
-- Se o participante falar sobre contribuição individual, ser notado ou, ao contrário, sentir que seu trabalho é "invisível":
-  - Sonda: "E nessa situação, era fácil para os outros saberem qual foi exatamente a sua parte no resultado?"
-  - Sonda: "Como você se sente sabendo que seu trabalho está 'exposto' ou visível para outras pessoas na organização?"
+REGRA 15 (ENCERRAMENTO NATURAL DA ENTREVISTA): O seu objetivo é uma entrevista de ~5 minutos. Após ter aprofundado um tema de forma satisfatória e sentir que tem material suficiente, você pode e deve iniciar o encerramento. Para fazer isso, a sua resposta final DEVE seguir esta estrutura de 3 passos:
+1. Comece com uma frase de transição positiva e de agradecimento.
+2. Continue com a frase de encerramento completa: "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
+3. Anexe o sinalizador secreto <END_INTERVIEW> no final de tudo.
 
-**TEMA: A NECESSIDADE DE SE EXPLICAR (Answerability)**
-- Se o participante falar sobre ter que justificar, defender ou dar satisfações:
-  - Sonda: "Isso de ter que 'defender seu método' parece ser um ponto importante. Como você se prepara para esses momentos?"
-  - Sonda: "O que você sente que é esperado de você quando precisa explicar suas decisões?"
+PROTOCOLO DE ESCLARECIMENTO: Se o participante não entender algo, explique o termo de forma simples e volte à pergunta.
 
-**TEMA: AS CONSEQUÊNCIAS DO TRABALHO (Consequencialidade)**
-- Se o participante falar sobre medo de errar, punição, recompensas ou reconhecimento:
-  - Sonda: "Você mencionou o 'medo de errar'. O que significa uma 'consequência negativa' no seu contexto? É algo formal ou mais sobre reputação?"
-  - Sonda: "E a possibilidade de um reconhecimento positivo muda a forma como você encara essa pressão?"
+PROTOCOLO DE EMOÇÕES: Se o participante usar palavras de forte carga emocional (ex: "raiva", "frustração"), a sua prioridade é explorar essa emoção com uma pergunta aberta (ex: "Entendo. O que exatamente nessa situação lhe causaria raiva?").
 
-**TEMA: A AVALIAÇÃO E O FEEDBACK (Avaliabilidade)**
-- Se o participante falar sobre ser julgado, avaliações de desempenho ou feedback:
-  - Sonda: "Como o feedback sobre seu trabalho geralmente acontece no seu dia a dia?"
-  - Sonda: "Você sente que há uma expectativa constante de que seu desempenho será formalmente avaliado?"
+PROTOCOLO ANTI-CONSELHOS: A sua função é entender, não resolver. Nunca dê conselhos ou soluções. A sua única ferramenta é a pergunta.
 
-**TEMA: QUEM AVALIA (Legitimidade e Competência do Fórum)**
-- Se o participante citar "meu chefe", "outra área", "gestores":
-  - Sonda (Legitimidade): "O que faz você sentir que a avaliação dessa pessoa ou área é válida e justa?"
-  - Sonda (Competência): "E você sente que eles têm o conhecimento técnico necessário para entender os desafios do seu trabalho?"
-
-# 6. PROTOCOLOS ADICIONAIS
-(Mantenha os protocolos de Encerramento, Esclarecimento, Emoções, Anti-Conselhos e Variação de Linguagem que já refinamos anteriormente).
+PROTOCOLO DE VARIAÇÃO DE LINGUAGEM: Evite soar repetitivo. Varie as suas frases de transição (use "Compreendo.", "Faz sentido.", "Certo.", etc., em vez de sempre "Entendo.").
 """
+
 vinhetas = [
     "Imagine que você precisa entregar um relatório importante com um prazo muito apertado. Sua chefia direta e outros gestores contam com esse trabalho para tomar uma decisão. Um erro ou atraso pode gerar um impacto negativo. Como essa pressão influenciaria sua forma de trabalhar?",
     "Pense que um procedimento que você considera correto e faz de forma consolidada é revisado por um novo gestor ou por outra área. A pessoa questiona seu método, mas você não tem certeza se ela compreende todo o contexto do seu trabalho. Como você reagiria a essa situação?",
@@ -124,7 +115,7 @@ def pagina_entrevistador():
 
     def analisar_consentimento(resposta_utilizador):
         model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt_analista = f"""Você é um assistente que analisa a resposta inicial de um participante de pesquisa. A pergunta feita foi: "Tudo bem? Podemos começar?". A sua tarefa é analisar a resposta do participante e decidir a próxima ação. A resposta do participante foi: "{resposta_utilizador}". Analise a resposta e escolha UMA das seguintes ações: - 'PROSSEGUIR': Se a resposta for um consentimento claro. - 'ENCERRAR': Se a resposta for uma recusa clara. - 'ESCLARECER': Se a resposta for ambígua ou sem sentido. Responda APENAS com a palavra PROSSEGUIR, ENCERRAR, ou ESCLARECER."""
+        prompt_analista = f"""Você é um assistente que analisa a resposta inicial de um participante de pesquisa. A pergunta feita foi: "Tudo bem? Podemos começar?". A sua tarefa é analisar a resposta do participante e decidir a próxima ação. A resposta do participante foi: "{resposta_utilizador}". Analise a resposta e escolha UMA das seguintes ações: - 'PROSSEGUIR': Se a resposta for um consentimento claro (sim, claro, podemos, ok, etc.). - 'ENCERRAR': Se a resposta for uma recusa clara (não, não quero, agora não, etc.). - 'ESCLARECER': Se a resposta for ambígua, sem sentido (ex: 'eedssd'), ou uma pergunta. Responda APENAS com a palavra PROSSEGUIR, ENCERRAR, ou ESCLARECER."""
         try:
             response = model.generate_content(prompt_analista)
             decisao = response.text.strip().upper()
@@ -134,25 +125,7 @@ def pagina_entrevistador():
 
     def classificar_intencao(prompt_utilizador):
         model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt_classificador = f"""
-        Você é um classificador de intenções para um chatbot de entrevista. A intenção do utilizador pode ser uma de duas:
-        1. 'ENTREVISTA': O utilizador está a responder a uma pergunta da entrevista, expressando sentimentos, pedindo um esclarecimento, ou fornecendo uma resposta irrelevante/sem sentido.
-        2. 'PESQUISA': O utilizador está a fazer uma pergunta sobre o projeto de pesquisa em si (seus objetivos, metodologia, anonimato, etc.).
-
-        Analise a seguinte frase do utilizador e classifique a sua intenção.
-        Frase do Utilizador: "{prompt_utilizador}"
-
-        Exemplos:
-        - Frase: "Eu tentaria conversar com meu chefe." -> Intenção: ENTREVISTA
-        - Frase: "Qual o objetivo deste estudo?" -> Intenção: PESQUISA
-        - Frase: "Ficaria com raiva." -> Intenção: ENTREVISTA
-        - Frase: "E sobre o anonimato?" -> Intenção: PESQUISA
-        - Frase: "Não entendi. Pode explicar de novo?" -> Intenção: ENTREVISTA
-        - Frase: "Abobora" -> Intenção: ENTREVISTA
-        - Frase: "não sei" -> Intenção: ENTREVISTA
-
-        Responda APENAS com a palavra 'PESQUISA' ou 'ENTREVISTA'.
-        """
+        prompt_classificador = f"""Você é um classificador de intenções para um chatbot de entrevista. A intenção do utilizador pode ser uma de duas: 1. 'ENTREVISTA': O utilizador está a responder a uma pergunta da entrevista, expressando sentimentos, ou pedindo um esclarecimento sobre a última pergunta feita pelo entrevistador. 2. 'PESQUISA': O utilizador está a fazer uma pergunta sobre o projeto de pesquisa em si. Analise a seguinte frase do utilizador e classifique a sua intenção. Frase do Utilizador: "{prompt_utilizador}". Exemplos: - Frase: "Eu tentaria conversar com meu chefe." -> Intenção: ENTREVISTA - Frase: "Qual o objetivo deste estudo?" -> Intenção: PESQUISA - Frase: "Ficaria com raiva." -> Intenção: ENTREVISTA - Frase: "E sobre o anonimato?" -> Intenção: PESQUISA - Frase: "Não entendi. Pode explicar de novo?" -> Intenção: ENTREVISTA. Responda APENAS com a palavra 'PESQUISA' ou 'ENTREVISTA'."""
         try:
             response = model.generate_content(prompt_classificador)
             if "PESQUISA" in response.text: return "PESQUISA"
@@ -163,7 +136,7 @@ def pagina_entrevistador():
         embedding_model = 'models/embedding-001'; pergunta_embedding = genai.embed_content(model=embedding_model, content=pergunta, task_type="retrieval_query")['embedding']
         k = 3; D, I = index.search(np.array([pergunta_embedding]).astype('float32'), k)
         contexto_relevante = " ".join([chunks[i] for i in I[0]])
-        model = genai.GenerativeModel('gemini-1.5-flash'); prompt_final = f"Baseado nisto: {contexto_relevante}. Responda a: \"{pergunta}\""
+        model = genai.GenerativeModel('gemini-1.5-flash'); prompt_final = f"Com base no seguinte contexto extraído do projeto de pesquisa:\n---\n{contexto_relevante}\n---\nPor favor, responda à seguinte pergunta do utilizador de forma clara e concisa: \"{pergunta}\""
         response = model.generate_content(prompt_final, stream=True)
         return response
 
@@ -204,7 +177,11 @@ def pagina_entrevistador():
         with st.chat_message("user"): st.write(prompt)
         with st.chat_message("assistant"):
             if st.session_state.model is None:
-                with st.spinner("Analisando..."): acao = analisar_consentimento(prompt)
+                # <<< CORREÇÃO AQUI: Limpa o input antes de o analisar >>>
+                prompt_limpo = prompt.lower().strip()
+                with st.spinner("Analisando..."): 
+                    acao = analisar_consentimento(prompt_limpo)
+                
                 if acao == "PROSSEGUIR":
                     st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
                     vinheta_escolhida = random.choice(vinhetas); st.session_state.messages.append({"role": "model", "content": vinheta_escolhida})
@@ -238,7 +215,6 @@ def pagina_entrevistador():
                 st.write(mensagem_encerramento); st.session_state.interview_over = True
             time.sleep(1); st.rerun()
 
-# --- LÓGICA PRINCIPAL: Decide qual página mostrar ---
 if st.query_params.get("admin") == "true":
     pagina_configuracao()
 else:
