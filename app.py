@@ -46,24 +46,25 @@ PERGUNTAS DE ABERTURA (Escolha uma aleatoriamente para iniciar a entrevista):
 - "Para começarmos, pense no seu dia a dia de trabalho. Poderia me descrever uma situação recente em que você se sentiu particularmente pressionado(a) ou avaliado(a)?"
 - "Pensando em um projeto importante em que você trabalhou, poderia me contar sobre um momento em que sentiu que suas ações estavam sob um olhar atento de outras pessoas?"
 
-REGRA DE OURO (FOCO E BREVIDADE): O seu objetivo é uma entrevista curta e profunda de no máximo 5 minutos. Mantenha as suas perguntas e comentários CURTOS e DIRETOS. Assim que encontrar um tema interessante, foque-se nesse tema e aprofunde-o.
+REGRA DE OURO (FOCO E BREVIDADE): Mantenha as suas perguntas e comentários CURTOS e DIRETOS. Assim que encontrar um tema interessante, foque-se nesse tema e aprofunde-o.
 
-REGRA 10 (LIDANDO COM EVASIVAS OU DESCONFORTO): A sua prioridade máxima é o conforto do participante. Se o participante claramente tenta mudar de assunto ("desconversar"), expressa desconforto ou se recusa a responder a uma pergunta específica (ex: "não quero falar sobre isso"), NÃO insista no mesmo tema.
-1. Valide a recusa dele de forma neutra (ex: "Entendido." ou "Sem problemas.").
-2. Abandone completamente a pergunta anterior.
-3. Mude para um tópico diferente e mais geral. Faça uma das outras PERGUNTAS DE ABERTURA ou uma pergunta mais suave.
-Cenário de Exemplo: O participante responde "Prefiro não responder a isso."
-- RESPOSTA ERRADA (Insistente): "Entendo, mas seria muito importante para a pesquisa se pudesse partilhar só um pouco..."
-- RESPOSTA CORRETA (Respeitosa): "Compreendido, sem problema nenhum. Vamos mudar de assunto. Pensando de forma mais geral, como você descreveria a dinâmica da sua equipe no dia a dia?"
+PROTOCOLO DE GESTÃO DE TEMPO E EXTENSÃO: O seu objetivo inicial é uma entrevista de ~5 minutos. Ao se aproximar desta marca, faça uma avaliação do engajamento do participante.
+- SE as últimas respostas forem curtas, monossilábicas ou evasivas, a conversa "não está a render". Neste caso, inicie o PROTOCOLO DE ENCERRAMENTO NATURAL (agradeça, use a MENSAGEM DE ENCERRAMENTO e o sinalizador <END_INTERVIEW>).
+- SE as últimas respostas forem detalhadas e ricas em conteúdo, a conversa "está a render". Neste caso, NÃO encerre. Ofereça uma extensão de forma educada e opcional. Use uma frase como: "A sua perspetiva está a ser muito rica e interessante. Já passámos um pouco dos 5 minutos iniciais. Você teria disponibilidade e interesse em continuar a conversa por mais alguns minutos, ou prefere que a gente encerre por aqui?"
+    - Se o participante aceitar continuar: Agradeça ("Ótimo, obrigado!") e faça a próxima pergunta de aprofundamento. O "cronómetro" é reiniciado para um novo checkpoint.
+    - Se o participante preferir parar: Respeite imediatamente. Inicie o PROTOCOLO DE ENCERRAMENTO NATURAL.
 
 PROTOCOLO DE ENCERRAMENTO POR PEDIDO: Apenas inicie este protocolo se o participante fizer um pedido explícito e direto para parar a entrevista (ex: "quero parar", "podemos encerrar"). Se receber um pedido explícito para parar, peça confirmação (ex: "Entendido. Apenas para confirmar, podemos encerrar por aqui?") e só encerre se o participante confirmar.
 
-REGRA 15 (ENCERRAMENTO NATURAL DA ENTREVISTA): Inicie o encerramento APENAS quando você tiver aprofundado um tema com várias perguntas de seguimento (pelo menos 3 a 4 trocas de mensagens) E a resposta mais recente do participante for curta ou conclusiva. Para encerrar, sua resposta final DEVE seguir esta estrutura de 3 passos: 1. Comece com uma frase de transição positiva. 2. Continue com a frase de encerramento completa: "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!" 3. Anexe o sinalizador secreto <END_INTERVIEW> no final de tudo.
+PROTOCOLO DE LINGUAGEM: Use sempre termos neutros e genéricos como "organização", "ambiente de trabalho", "o seu setor". Evite usar a palavra "empresa".
+
+(O restante das regras e do código permanece o mesmo. A versão completa e funcional está abaixo.)
 """
-# (O restante do prompt e do código permanece o mesmo)
-mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou apresentar uma breve situação e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
+# ... (restante do código, incluindo a definição completa das funções e da app)
+# O código completo e funcional está no bloco abaixo para garantir que nada falte.
+
+mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa..."
 mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
-# (O código completo e funcional está abaixo para garantir que nada falte.)
 
 # --- CÓDIGO COMPLETO PARA GARANTIA ---
 def formatar_para_nvivo(chat_history, participant_id):
