@@ -83,8 +83,11 @@ def salvar_mapa_pseudonimos(mapa):
         json.dump(mapa, f, ensure_ascii=False, indent=4)
 
 def pseudonimizar_texto(texto, mapa):
+    # O dicionário de padrões foi corrigido e melhorado
     padroes = {
-        'Pessoa': r'\b([A-Z][a-z]+(?: [A-Z][a-z]+)+)\b',
+        # CORREÇÃO: Este padrão agora detecta nomes simples ("Carlos") ou compostos ("Carlos Silva").
+        # A regra de começar com letra maiúscula foi mantida para evitar substituir palavras comuns.
+        'Pessoa': r'\b[A-Z][a-z]+(?: [A-Z][a-z]+)*\b', 
         'Sigla': r'\b(SUBCON|CGM-RJ|[A-Z]{3,})\b',
         'Email': r'[\w\.-]+@[\w\.-]+'
     }
