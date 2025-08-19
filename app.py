@@ -8,18 +8,16 @@ import uuid
 from github import Github
 import random
 import google.api_core.exceptions
-import faiss
-import numpy as np
-import pickle
-from io import BytesIO
 
 # --- Configurações Essenciais ---
+# Certifique-se de que suas chaves estão no secrets.toml do Streamlit
 genai.configure(api_key=st.secrets["gemini_api_key"])
 GITHUB_TOKEN = st.secrets.get("github_token")
 GITHUB_USER = st.secrets.get("github_user")
 REPO_NAME = "Entrevistador"
 
 # --- ROTEIRO DA ENTREVISTA E INSTRUÇÕES PARA A IA (PERSONA) ---
+# CORREÇÃO: Lógica de início ajustada e protocolo de encerramento adicionado.
 orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa.
@@ -37,10 +35,12 @@ Sua única ferramenta é a próxima pergunta.
 Seu objetivo é conduzir uma entrevista qualitativa breve para compreender como a felt accountability se manifesta no dia a dia da SUBCON/CGM-RJ.
 
 # 4. PROTOCOLOS E REGRAS PRINCIPAIS
-PROTOCOLO DE INÍCIO DA CONVERSA: A primeira mensagem que você receberá é a resposta do participante à pergunta 'Podemos começar?'.
-- Se a resposta for um consentimento claro (sim, ok, claro), mesmo que hesitante: Responda com uma das PERGUNTAS DE ABERTURA.
-- Se a resposta for uma recusa clara (não, não quero): Ative o PROTOCOLO DE ENCERRAMENTO POR PEDIDO.
-- Se a resposta for ambígua ou sem sentido: Responda com a MENSAGEM DE ESCLARECIMENTO.
+PROTOCOLO DE INÍCIO DA CONVERSA: A conversa sempre começará com a minha mensagem de abertura: 'Olá! ... Podemos começar?'. A sua primeira tarefa é analisar a mensagem do usuário que virá logo em seguida.
+- Se a resposta do usuário for um consentimento claro (sim, ok, claro, podemos): Responda com uma das PERGUNTAS DE ABERTURA.
+- Se a resposta do usuário for uma recusa clara (não, não quero): Responda com a MENSAGEM DE ENCERRAMENTO (que inclui a tag <END_INTERVIEW>).
+- Se a resposta do usuário for ambígua ou sem sentido: Responda com a MENSAGEM DE ESCLARECIMENTO.
+
+PROTOCOLO DE ENCERRAMENTO POR CONCLUSÃO: Após sentir que aprofundou suficientemente um ou dois exemplos do participante e a conversa parece estar se tornando circular ou o participante dá respostas curtas, você deve encerrar a entrevista. Para isso, responda com a MENSAGEM DE ENCERRAMENTO e, ao final da sua mensagem, inclua a tag especial <END_INTERVIEW>.
 
 PERGUNTAS DE ABERTURA (Escolha uma aleatoriamente para iniciar a entrevista):
 - "Para começarmos, pense no seu dia a dia de trabalho. Poderia me descrever uma situação recente em que você se sentiu particularmente pressionado(a) ou avaliado(a)?"
@@ -48,16 +48,13 @@ PERGUNTAS DE ABERTURA (Escolha uma aleatoriamente para iniciar a entrevista):
 
 REGRA DE OURO (FOCO E BREVIDADE): O seu objetivo é uma entrevista curta e profunda de no máximo 5 minutos. Mantenha as suas perguntas e comentários CURTOS e DIRETOS. Assim que encontrar um tema interessante, foque-se nesse tema e aprofunde-o.
 
-PROTOCOLO DE ENCERRAMENTO POR PEDIDO: Apenas inicie este protocolo se o participante fizer um pedido explícito e direto para parar a entrevista (ex: "quero parar", "podemos encerrar"). Se receber um pedido explícito para parar, peça confirmação (ex: "Entendido. Apenas para confirmar, podemos encerrar por aqui?") e só encerre se o participante confirmar.
+PROTOCOLO DE ENCERRAMENTO POR PEDIDO: Apenas inicie este protocolo se o participante fizer um pedido explícito e direto para parar a entrevista (ex: "quero parar", "podemos encerrar"). Se receber um pedido explícito para parar, peça confirmação (ex: "Entendido. Apenas para confirmar, podemos encerrar por aqui?") e só encerre com a MENSAGEM DE ENCERRAMENTO se o participante confirmar.
 
 REGRA 10 (LIDANDO COM EVASIVAS OU DESCONFORTO): Se o participante claramente tenta mudar de assunto ou se recusa a responder, NÃO insista no mesmo tema. Valide a recusa ("Entendido.") e mude para um tópico diferente e mais geral.
 """
-# <<< MENSAGEM DE ABERTURA CORRIGIDA AQUI >>>
 mensagem_abertura = "Olá! Agradeço sua disposição para esta etapa da pesquisa. A conversa é totalmente anônima e o objetivo é aprofundar algumas percepções sobre o ambiente organizacional onde você exerce suas atividades. Vou fazer-lhe uma pergunta ampla para iniciarmos a conversa e gostaria de ouvir suas reflexões. Lembrando que você pode interromper a entrevista a qualquer momento. Tudo bem? Podemos começar?"
-
-mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia!"
+mensagem_encerramento = "Agradeço muito pelo seu tempo e por compartilhar suas percepções. Sua contribuição é extremamente valiosa. A entrevista está encerrada. Tenha um ótimo dia! <END_INTERVIEW>"
 mensagem_esclarecimento = "Desculpe, não entendi a sua resposta. Poderia apenas confirmar se podemos começar a entrevista, por favor?"
-
 
 def formatar_para_nvivo(chat_history, participant_id):
     fuso_horario_br = datetime.timezone(datetime.timedelta(hours=-3))
@@ -77,10 +74,18 @@ def save_transcript_to_github(chat_history, participant_id):
         file_path = f"transcricoes/entrevista_{participant_id}.txt"
         g = Github(GITHUB_TOKEN)
         repo = g.get_repo(f"{GITHUB_USER}/{REPO_NAME}")
-        repo.create_file(file_path, f"Adicionando transcrição para {participant_id}", conteudo_formatado, branch="main")
+        
+        try:
+            contents = repo.get_contents(file_path, ref="main")
+            repo.update_file(contents.path, f"Atualizando transcrição para {participant_id}", conteudo_formatado, contents.sha, branch="main")
+            st.toast("Transcrição atualizada com sucesso no GitHub.")
+        except Exception:
+            repo.create_file(file_path, f"Adicionando transcrição para {participant_id}", conteudo_formatado, branch="main")
+            st.toast("Transcrição salva com sucesso no GitHub.")
+            
         st.session_state.transcript_saved = True
     except Exception as e:
-        print(f"Erro ao salvar no GitHub: {e}")
+        st.error(f"ATENÇÃO: A transcrição não pôde ser salva no GitHub. Por favor, copie o texto manualmente. Erro: {e}")
 
 def stream_handler(stream):
     for chunk in stream:
@@ -121,7 +126,7 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input", disabled=st.sess
             final_text_to_save = full_response_text.replace("<END_INTERVIEW>", "").strip()
             st.session_state.messages.append({"role": "model", "content": final_text_to_save, "timestamp": datetime.datetime.now(datetime.timezone.utc)})
 
-            if "<END_INTERVIEW>" in full_response_text or mensagem_encerramento in full_response_text:
+            if "<END_INTERVIEW>" in full_response_text:
                 st.session_state.interview_over = True
                 save_transcript_to_github(st.session_state.messages, st.session_state.participant_id)
         except Exception as e:
@@ -129,11 +134,9 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input", disabled=st.sess
     st.rerun()
 
 if not st.session_state.get('interview_over', False):
-    if st.button("Encerrar Entrevista"):
+    if st.button("Encerrar Entrevista Manualmente"):
         with st.spinner("Salvando e encerrando..."):
             st.session_state.messages.append({"role": "model", "content": mensagem_encerramento, "timestamp": datetime.datetime.now(datetime.timezone.utc)})
             save_transcript_to_github(st.session_state.messages, st.session_state.participant_id)
-            st.write(mensagem_encerramento)
             st.session_state.interview_over = True
-        time.sleep(1)
         st.rerun()
