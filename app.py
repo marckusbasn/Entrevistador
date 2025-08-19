@@ -14,20 +14,20 @@ import re
 import google.api_core.exceptions
 
 # Configura as chaves de API a partir dos segredos do Streamlit
-# Lembre-se de configurar o arquivo .streamlit/secrets.toml
 try:
     genai.configure(api_key=st.secrets["gemini_api_key"])
-    GITHUB_TOKEN = st.secrets["github_token"]
-    GITHUB_USER = st.secrets["github_user"]
-    REPO_NAME = "Entrevistador"
+    GITHUB_TOKEN = st.secrets.get("github_token", "") # Usa "" como padrão se não encontrar
+    GITHUB_USER = st.secrets.get("github_user", "")
+    REPO_NAME = st.secrets.get("repo_name", "Entrevistador")
 except (KeyError, FileNotFoundError) as e:
-    st.error(f"Erro: A chave '{e.args[0]}' não foi encontrada nos segredos do Streamlit. Por favor, configure o arquivo .streamlit/secrets.toml")
+    st.error(f"Erro: A chave '{e.args[0]}' não foi encontrada nos segredos. Configure o .streamlit/secrets.toml")
     st.stop()
 
 
 # ==============================================================================
-# 2. PROMPT DA IA, MENSAGENS E VARIÁVEIS GLOBAIS
+# 2. PROMPT DA IA E MENSAGENS
 # ==============================================================================
+# (O prompt 'orientacoes_completas' permanece o mesmo da versão anterior)
 orientacoes_completas = """
 # 1. IDENTIDADE E PERSONA
 Você é um assistente de pesquisa. Sua personalidade é profissional, neutra e curiosa.
@@ -76,46 +76,58 @@ def carregar_mapa_pseudonimos():
     if os.path.exists(MAP_FILENAME):
         with open(MAP_FILENAME, 'r', encoding='utf-8') as f:
             return json.load(f)
-    return {"contador_geral": 0}
+    return {"contador_geral": 0, "mapa": {}}
 
-def salvar_mapa_pseudonimos(mapa):
+def salvar_mapa_pseudonimos(mapa_data):
     with open(MAP_FILENAME, 'w', encoding='utf-8') as f:
-        json.dump(mapa, f, ensure_ascii=False, indent=4)
+        json.dump(mapa_data, f, ensure_ascii=False, indent=4)
 
-def pseudonimizar_texto(texto, mapa):
-    # O dicionário de padrões foi corrigido e melhorado
+def pseudonimizar_texto(texto, mapa_data):
+    # VERSÃO CORRIGIDA: Detecta nomes próprios (simples ou compostos) ignorando maiúsculas/minúsculas
+    # e também siglas importantes.
     padroes = {
-        # CORREÇÃO: Este padrão agora detecta nomes simples ("Carlos") ou compostos ("Carlos Silva").
-        # A regra de começar com letra maiúscula foi mantida para evitar substituir palavras comuns.
-        'Pessoa': r'\b[A-Z][a-z]+(?: [A-Z][a-z]+)*\b', 
-        'Sigla': r'\b(SUBCON|CGM-RJ|[A-Z]{3,})\b',
-        'Email': r'[\w\.-]+@[\w\.-]+'
+        'Pessoa': r'\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b', # Ex: "Carlos" ou "Carlos Silva"
+        'Sigla': r'\b(SUBCON|CGM-RJ|[A-Z]{3,})\b'
     }
+    
     texto_processado = texto
+    mapa_interno = mapa_data.get("mapa", {})
+    
     for tipo, padrao in padroes.items():
-        for entidade in re.findall(padrao, texto_processado):
-            if len(entidade) <= 2 or entidade.upper() in ['SIM', 'NAO', 'OK']: continue
-            if entidade not in mapa:
-                mapa['contador_geral'] += 1
-                pseudonimo = f"[{tipo}_{mapa['contador_geral']}]"
-                mapa[entidade] = pseudonimo
-            texto_processado = texto_processado.replace(entidade, mapa[entidade])
-    return texto_processado, mapa
+        # re.IGNORECASE faz a busca ignorar se é maiúscula ou minúscula
+        for entidade in re.findall(padrao, texto_processado, re.IGNORECASE):
+            # Normaliza a entidade para ter um mapeamento consistente (ex: "carlos" e "Carlos" viram o mesmo pseudônimo)
+            entidade_normalizada = entidade.title()
+
+            if entidade_normalizada not in mapa_interno:
+                mapa_data['contador_geral'] += 1
+                pseudonimo = f"[{tipo}_{mapa_data['contador_geral']}]"
+                mapa_interno[entidade_normalizada] = pseudonimo
+            
+            # Substitui a entidade encontrada no texto (mantendo a original, mas com o pseudônimo)
+            texto_processado = re.sub(r'\b' + re.escape(entidade) + r'\b', mapa_interno[entidade_normalizada], texto_processado, flags=re.IGNORECASE)
+    
+    mapa_data["mapa"] = mapa_interno
+    return texto_processado, mapa_data
+
 
 def criar_transcricao_para_github(chat_history, participant_id):
     fuso_horario_br = datetime.timezone(datetime.timedelta(hours=-3))
-    timestamp_inicio = chat_history[0]['timestamp'].astimezone(fuso_horario_br).strftime("%d-%m-%Y %H:%M") if chat_history else "N/A"
+    timestamp_inicio = chat_history[0]['timestamp'].astimezone(fuso_horario_br).strftime("%d-%m-%Y %H:%M")
     texto_formatado = f"ID Anónimo do Participante: {participant_id}\n"
     texto_formatado += f"Transcrição da Entrevista (Pseudonimizada): {timestamp_inicio}\n\n"
     for msg in chat_history:
         role = "Participante" if msg['role'] == 'user' else 'Entrevistador'
-        timestamp = msg.get('timestamp', datetime.datetime.now(datetime.timezone.utc)).astimezone(fuso_horario_br).strftime('%H:%M:%S')
-        # USA APENAS O CONTEÚDO SEGURO (PSEUDONIMIZADO)
-        texto_formatado += f"[{timestamp}] {role}: {msg['content']}\n"
+        timestamp = msg.get('timestamp').astimezone(fuso_horario_br).strftime('%H:%M:%S')
+        texto_formatado += f"[{timestamp}] {role}: {msg['content']}\n" # Salva apenas o conteúdo pseudonimizado
     return texto_formatado
+
 
 def save_transcript_to_github(chat_history, participant_id):
     if st.session_state.get('transcript_saved', False): return
+    if not all([GITHUB_TOKEN, GITHUB_USER, REPO_NAME]):
+        st.warning("Configurações do GitHub não encontradas nos segredos. A transcrição não será salva.")
+        return
     try:
         conteudo_formatado = criar_transcricao_para_github(chat_history, participant_id)
         file_path = f"transcricoes/entrevista_{participant_id}.txt"
@@ -129,7 +141,7 @@ def save_transcript_to_github(chat_history, participant_id):
         st.toast("Transcrição salva com sucesso no GitHub.")
         st.session_state.transcript_saved = True
     except Exception as e:
-        st.error(f"ATENÇÃO: A transcrição não pôde ser salva no GitHub. Por favor, copie o histórico da conversa manualmente. Erro: {e}")
+        st.error(f"ATENÇÃO: A transcrição não pôde ser salva no GitHub. Copie o histórico manualmente. Erro: {e}")
 
 def stream_handler(stream):
     for chunk in stream:
@@ -141,6 +153,14 @@ def stream_handler(stream):
 # ==============================================================================
 st.title("Entrevista para Pesquisa")
 
+# --- NOVO: MODO DE VERIFICAÇÃO ---
+with st.sidebar:
+    st.header("Ferramentas do Pesquisador")
+    developer_mode = st.toggle("Ativar Modo de Verificação", value=False)
+    if developer_mode:
+        st.info("Modo de Verificação Ativo: Você verá o texto que foi enviado para a IA.")
+        st.warning("Lembre-se de desativar este modo antes de enviar para os participantes reais.")
+
 # Inicialização da sessão
 if "messages" not in st.session_state:
     st.session_state.model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=orientacoes_completas)
@@ -148,6 +168,7 @@ if "messages" not in st.session_state:
     st.session_state.interview_over = False
     st.session_state.transcript_saved = False
     st.session_state.participant_id = f"anon_{uuid.uuid4().hex[:8]}"
+    st.session_state.mapa_dados = carregar_mapa_pseudonimos()
     st.session_state.start_time = datetime.datetime.now(datetime.timezone.utc)
     st.session_state.messages.append({"role": "model", "content": mensagem_abertura, "timestamp": st.session_state.start_time})
 
@@ -156,12 +177,15 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         conteudo_para_exibir = message.get("original_content", message["content"])
         st.write(conteudo_para_exibir)
+        # Se o modo de verificação estiver ativo, mostra o que foi enviado para a IA
+        if developer_mode and message["role"] == "user":
+            st.code(f"Enviado para IA: {message['content']}", language="text")
 
 # Processamento da entrada do usuário
 if prompt := st.chat_input("Sua resposta...", key="chat_input", disabled=st.session_state.get('interview_over', False)):
-    mapa = carregar_mapa_pseudonimos()
-    texto_pseudonimizado, mapa_atualizado = pseudonimizar_texto(prompt, mapa)
+    texto_pseudonimizado, mapa_atualizado = pseudonimizar_texto(prompt, st.session_state.mapa_dados)
     salvar_mapa_pseudonimos(mapa_atualizado)
+    st.session_state.mapa_dados = mapa_atualizado
     
     st.session_state.messages.append({
         "role": "user", 
@@ -172,12 +196,14 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input", disabled=st.sess
     
     with st.chat_message("user"):
         st.write(prompt)
+        if developer_mode:
+             st.code(f"Enviado para IA: {texto_pseudonimizado}", language="text")
 
     with st.chat_message("assistant"):
         placeholder = st.empty()
         placeholder.markdown("Digitando…")
         
-        history_for_api = [{'role': ('model' if msg['role'] == 'model' else 'user'), 'parts': [msg['content']]} for msg in st.session_state.messages]
+        history_for_api = [{'role': 'user' if msg['role'] == 'user' else 'model', 'parts': [msg['content']]} for msg in st.session_state.messages]
         
         try:
             response_stream = st.session_state.model.generate_content(history_for_api, stream=True)
@@ -191,7 +217,7 @@ if prompt := st.chat_input("Sua resposta...", key="chat_input", disabled=st.sess
                 st.session_state.interview_over = True
                 save_transcript_to_github(st.session_state.messages, st.session_state.participant_id)
         except Exception as e:
-            placeholder.error(f"Ocorreu um erro: {e}")
+            placeholder.error(f"Ocorreu um erro com a API: {e}")
     st.rerun()
 
 # Botão de encerramento manual
